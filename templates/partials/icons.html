@@ -1,0 +1,90 @@
+{# Reusable inline SVG icons / doodles #}
+{% macro logo() %}
+<img class="logo-img" src="{{ url_for('static', filename='img/logo.gif') }}" width="32" height="32" alt="" aria-hidden="true">
+{% endmacro %}
+
+{% macro gear() %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+{% endmacro %}
+
+{% macro user() %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+{% endmacro %}
+
+{% macro play() %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>
+{% endmacro %}
+
+{% macro hand() %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11m0-5.5a1.5 1.5 0 0 1 3 0V11m0-4a1.5 1.5 0 0 1 3 0v6m-9-.5-1.4-1.9a1.5 1.5 0 0 0-2.4 1.8L8 17.5A6 6 0 0 0 13 21h1a5 5 0 0 0 5-5v-3a1.5 1.5 0 0 0-3 0"/></svg>
+{% endmacro %}
+
+{% macro pointer_hand() %}
+<svg viewBox="0 0 24 24" fill="#fff" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11V4.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L4 14.5a1.6 1.6 0 0 1 2.6-1.8L9 15"/></svg>
+{% endmacro %}
+
+{% macro squiggle(w=64) %}
+<svg width="{{ w }}" height="16" viewBox="0 0 64 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M2 12 5 3l3 9 3-9 3 9" stroke="#6db3e8"/><path d="M16 6c3-4 5 6 8 1" stroke="#ef7f72"/><path d="M26 8l4-4 4 4-4 4z" stroke="#f6c85f"/><path d="M38 12l3-9 3 9 3-9 3 9" stroke="#8460d6"/><path d="M54 4l3 8 3-8 3 8" stroke="#f6c85f"/></svg>
+{% endmacro %}
+
+{% macro sparkle(color='#f6c85f', cls='') %}
+<svg class="sparkle {{ cls }}" viewBox="0 0 24 24" fill="none" stroke="{{ color }}" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2c.8 5.2 2.8 8 10 10-7.2 2-9.2 4.8-10 10-.8-5.2-2.8-8-10-10 7.2-2 9.2-4.8 10-10z"/></svg>
+{% endmacro %}
+
+{% macro wave(color='#6db3e8') %}
+<svg width="30" height="16" viewBox="0 0 30 16" fill="none" stroke="{{ color }}" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M2 13C8 2 13 2 16 8s8 5 12-5"/></svg>
+{% endmacro %}
+
+{% macro flower() %}
+<svg class="flower" viewBox="0 0 200 260" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <g stroke-width="5">
+    <ellipse data-draw style="--s:0;--l:.09"   pathLength="1" cx="100" cy="40" rx="19" ry="30" stroke="#8460d6" transform="rotate(25 100 78)"/>
+    <ellipse data-draw style="--s:.06;--l:.09" pathLength="1" cx="100" cy="40" rx="19" ry="30" stroke="#ef7f72" transform="rotate(95 100 78)"/>
+    <ellipse data-draw style="--s:.12;--l:.09" pathLength="1" cx="100" cy="40" rx="19" ry="30" stroke="#ef7f72" transform="rotate(150 100 78)"/>
+    <ellipse data-draw style="--s:.18;--l:.09" pathLength="1" cx="100" cy="40" rx="19" ry="30" stroke="#8460d6" transform="rotate(205 100 78)"/>
+    <ellipse data-draw style="--s:.24;--l:.09" pathLength="1" cx="100" cy="40" rx="19" ry="30" stroke="#ef7f72" transform="rotate(275 100 78)"/>
+    <ellipse data-draw style="--s:.30;--l:.09" pathLength="1" cx="100" cy="40" rx="19" ry="30" stroke="#8460d6" transform="rotate(330 100 78)"/>
+  </g>
+  <circle data-pop style="--s:.38;--l:.06" cx="100" cy="78" r="26" fill="#f6c85f"/>
+  <g stroke="#6bb89a" stroke-width="5">
+    <path data-draw style="--s:.45;--l:.13" pathLength="1" d="M100 104c-2 40 4 80-6 140"/>
+    <path data-draw style="--s:.59;--l:.08" pathLength="1" d="M97 190c-12-14-34-14-46-4 14 14 34 14 46 4z"/>
+    <path data-draw style="--s:.68;--l:.08" pathLength="1" d="M97 176c10-16 30-20 46-12-8 16-28 22-46 12z"/>
+  </g>
+</svg>
+{% endmacro %}
+
+{% macro arrow_left() %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg>
+{% endmacro %}
+
+{% macro mini_flower() %}
+<svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+  <g fill="#ece8fb" stroke="#8460d6" stroke-width="1.5">
+    <ellipse cx="20" cy="9" rx="4" ry="7"/>
+    <ellipse cx="20" cy="9" rx="4" ry="7" transform="rotate(60 20 20)"/>
+    <ellipse cx="20" cy="9" rx="4" ry="7" transform="rotate(120 20 20)"/>
+    <ellipse cx="20" cy="9" rx="4" ry="7" transform="rotate(180 20 20)"/>
+    <ellipse cx="20" cy="9" rx="4" ry="7" transform="rotate(240 20 20)"/>
+    <ellipse cx="20" cy="9" rx="4" ry="7" transform="rotate(300 20 20)"/>
+  </g>
+  <circle cx="20" cy="20" r="4" fill="#f6c85f"/>
+</svg>
+{% endmacro %}
+
+{% macro doc() %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 13h6m-6 4h6"/></svg>
+{% endmacro %}
+
+{% macro clock() %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+{% endmacro %}
+
+{% macro chat() %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.5 8.5 0 0 1-3.5-.8L4 20l1.2-3.6A7.2 7.2 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7z"/></svg>
+{% endmacro %}
+
+{% macro undo() %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-2"/></svg>
+{% endmacro %}

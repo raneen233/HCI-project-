@@ -1,0 +1,35 @@
+{% import "partials/icons.html" as i %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Skribble{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<div class="page">
+  {% block header %}
+  <header class="site-header">
+    <div class="container">
+      <a class="brand gesture-target" href="{{ url_for('home') }}">{{ i.logo() }}<span>Skribble</span></a>
+      <div class="header-actions">
+        {% block header_actions %}
+          <a class="icon-btn gesture-target" href="{{ url_for('settings') }}" aria-label="Settings">{{ i.gear() }}</a>
+        {% endblock %}
+      </div>
+    </div>
+    <div class="header-squiggle deco">{{ i.squiggle() }}</div>
+  </header>
+  {% endblock %}
+
+  {% block content %}{% endblock %}
+</div>
+{% block scripts %}{% endblock %}
+</body>
+</html>

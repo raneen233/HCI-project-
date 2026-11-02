@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - Skribble{% endblock %}
+{% block content %}
+<main class="container" style="flex:1;display:grid;place-items:center;text-align:center">
+  <div>
+    <h1 style="font-size:40px;font-weight:900;margin:0 0 8px">{{ title }}</h1>
+    <p style="color:var(--ink-soft);margin:0 0 24px">This page is coming soon.</p>
+    <a class="btn btn-outline gesture-target" href="{{ url_for('home') }}">Back to Home</a>
+  </div>
+</main>
+{% endblock %}

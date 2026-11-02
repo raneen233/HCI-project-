@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Skribble - Let's Skribble!{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">{% endblock %}
+
+{% block header_actions %}
+  {% if username %}
+    <span class="welcome-pill"><span class="avatar"></span>Welcome, {{ username }}</span>
+  {% else %}
+    <a class="btn btn-outline btn-sm gesture-target" href="{{ url_for('login') }}">{{ i.user() }}Log In</a>
+  {% endif %}
+  <a class="icon-btn gesture-target" href="{{ url_for('settings') }}" aria-label="Settings">{{ i.gear() }}</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-corner tr dots deco"><i></i><i></i><i></i></div>
+
+<main class="container hero">
+  <section class="hero-copy">
+    <h1>Let's Skribble!</h1>
+    <p class="tagline">Draw it. Guess it. Laugh about it.
+      <span>{{ i.squiggle(44) }}</span></p>
+
+    <div class="cta-stack">
+      <a class="btn btn-primary gesture-target" href="{{ url_for('setup') }}">{{ i.play() }}Play Now</a>
+      <a class="btn btn-outline gesture-target" href="{{ url_for('how_to_play') }}">{{ i.hand() }}How to Play</a>
+    </div>
+    <p class="gesture-hint">{{ i.hand() }}Move your hand to a button. Pinch to select.</p>
+  </section>
+
+  <section class="hero-art" aria-hidden="true">
+    <div class="ring">
+      <div class="ring-inner">
+        {{ i.flower() }}
+        <span class="cursor-hand">{{ i.pointer_hand() }}</span>
+        <span class="ring-caption"><i></i>A pinch of imagination.</span>
+      </div>
+    </div>
+    <span class="deco d1">{{ i.sparkle('#f6c85f') }}</span>
+    <span class="deco d2">{{ i.wave('#6db3e8') }}</span>
+    <span class="deco d3">{{ i.sparkle('#6db3e8') }}</span>
+    <span class="deco d4">{{ i.wave('#ef7f72') }}</span>
+    <span class="deco d5"></span>
+    <span class="deco d6"></span>
+  </section>
+</main>
+
+<div class="page-corner bl deco">{{ i.squiggle() }}</div>
+<div class="page-corner br dots deco"><i></i><i></i><i></i></div>
+{% endblock %}

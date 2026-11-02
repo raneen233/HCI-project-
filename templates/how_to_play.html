@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% import "partials/howto_art.html" as art %}
+{% block title %}How to Play - Skribble{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/how_to_play.css') }}">{% endblock %}
+
+{% block header_left %}
+  <a class="btn btn-outline btn-sm gesture-target" href="{{ url_for('home') }}">{{ i.arrow_left() }}Back to Home</a>
+{% endblock %}
+{% block header_deco %}{% endblock %}
+
+{% block content %}
+<main class="container howto">
+  <h1 class="howto-title">How to Play Skribble <span class="title-flower">{{ i.mini_flower() }}</span></h1>
+
+  <p class="howto-caption" aria-live="polite">
+    <span class="on" data-cap>1 - Move</span>
+    <span data-cap>2 - Draw &amp; Select</span>
+  </p>
+  <div class="pager" aria-hidden="true"><i class="on"></i><i></i></div>
+
+  <div class="deck" id="deck">
+    <article class="slide is-active" aria-label="Step 1 of 2">
+      <div class="card">
+        <div class="card-top"><span class="card-step">1 — Move</span><span class="card-badge">✋</span></div>
+        <div class="card-art">{{ art.move_art() }}</div>
+        <h2>Open Palm to Move</h2>
+        <p>Open your palm and move your hand to control the cursor without drawing.</p>
+        <p class="card-note">Cursor moves · No drawing</p>
+      </div>
+    </article>
+
+    <article class="slide is-after" aria-label="Step 2 of 2">
+      <div class="card">
+        <div class="card-top"><span class="card-step">2 — Draw</span><span class="card-badge">✏️</span></div>
+        <div class="card-art">{{ art.pinch_art() }}</div>
+        <h2>Pinch to Draw or Select</h2>
+        <p>Pinch to draw on the canvas or select a button, color, or tool. Release the pinch to stop drawing.</p>
+        <p class="card-note">Canvas: pinch + move → draw · release → stop<br>Buttons, colors &amp; tools: point + pinch → select</p>
+      </div>
+    </article>
+  </div>
+
+  <section class="round">
+    <h2>How a Round Works</h2>
+    <ol class="round-steps">
+      <li><span class="tile tile-yellow">{{ i.doc() }}</span>
+        <div><h3>1. Get Your Word</h3><p>Receive a secret word that you need to draw. Keep it hidden from your friend!</p></div></li>
+      <li><span class="tile tile-blue">{{ i.clock() }}</span>
+        <div><h3>2. Draw with Gestures</h3><p>Use your hand gestures to draw the word on the canvas before the timer runs out.</p></div></li>
+      <li><span class="tile tile-pink">{{ i.chat() }}</span>
+        <div><h3>3. Let Your Friend Guess</h3><p>Your friend sees your drawing and chooses an answer. Earn points by helping them guess correctly!</p></div></li>
+    </ol>
+  </section>
+
+  <div class="controls">
+    <div class="ctrl is-on" data-ctrl="first">
+      <button class="btn btn-lift gesture-target" id="btn-next" type="button">{{ i.play() }}Next</button>
+    </div>
+    <div class="ctrl" data-ctrl="last" inert>
+      <button class="btn btn-outline gesture-target" id="btn-back" type="button">{{ i.undo() }}Back</button>
+      <a class="btn btn-primary gesture-target" href="{{ url_for('setup') }}">{{ i.play() }}Let's Play!</a>
+    </div>
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}<script src="{{ url_for('static', filename='js/how_to_play.js') }}"></script>{% endblock %}

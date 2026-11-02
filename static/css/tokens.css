@@ -1,0 +1,25 @@
+/* Design tokens - one place for the whole look */
+:root {
+  --bg: #f4f3ee;
+  --surface: #ffffff;
+  --ink: #2a2840;
+  --ink-soft: #6f6d82;
+  --purple: #8460d6;
+  --purple-dark: #6f4cc4;
+  --purple-tint: #efebf7;
+  --coral: #ef7f72;
+  --yellow: #f6c85f;
+  --blue: #6db3e8;
+  --green: #6bb89a;
+  --pink: #f3b9d0;
+
+  --font: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 22px;
+  --shadow-btn: 0 8px 18px rgba(132, 96, 214, .28);
+  --shadow-soft: 0 6px 20px rgba(42, 40, 64, .07);
+
+  /* gesture targets must be big enough to hit with a hand cursor */
+  --target-h: 52px;
+}
