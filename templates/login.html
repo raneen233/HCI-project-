@@ -53,6 +53,19 @@
         {% endfor %}
       </div>
       <p class="bt-hint" id="bt-hint">A green dot means that player's phone is nearby. Tap it to sign in.</p>
+
+      <form class="auth-form" method="post" action="{{ url_for('login', next=next) }}">
+        <label for="username">Username</label>
+        <input class="input gesture-target" id="username" name="username" type="text" autocomplete="username">
+        <label for="password">Password</label>
+        <input class="input gesture-target" id="password" name="password" type="password" autocomplete="current-password">
+        <label for="login-mac">Register a nearby device (optional)</label>
+        <select class="input gesture-target" id="login-mac" name="mac_address">
+          <option value="">Don't register a device</option>
+        </select>
+        <button class="btn btn-primary auth-submit gesture-target" type="submit">Sign in</button>
+      </form>
+      <p><a class="auth-link" href="{{ url_for('register') }}">Create an account</a></p>
     </div>
 
     <footer class="auth-foot">

@@ -85,6 +85,13 @@
           {{ field_error('terms') }}
         </div>
 
+        <div class="field">
+          <label for="register-mac">Nearby Bluetooth device (optional)</label>
+          <select class="input gesture-target" id="register-mac" name="mac_address">
+            <option value="">Register later</option>
+          </select>
+        </div>
+
         <button class="btn btn-primary auth-submit gesture-target" type="submit">
           <span class="spinner" aria-hidden="true"></span>
           <span class="submit-label">Create Account</span>
@@ -103,5 +110,6 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/validation.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bluetooth_register.js') }}"></script>
 <script src="{{ url_for('static', filename='js/register.js') }}"></script>
 {% endblock %}

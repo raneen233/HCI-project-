@@ -3,12 +3,14 @@ Run:  python app.py   ->  http://127.0.0.1:5000
 """
 import base64
 import json
+import sqlite3
 import time
 import uuid
 from pathlib import Path
 
 from flask import Flask, render_template, session, redirect, url_for, request, flash, send_file, abort, jsonify
 from bluetooth_scanner import scanner
+from ble_auth import DATABASE, auth_server, send_request, initialize_database
 from game_words import pick_words, answer_options
 from markupsafe import Markup
 import word_icons
@@ -18,6 +20,8 @@ app = Flask(__name__)
 # {{ word_icon("Piano") }} in a template draws that word's line icon
 app.jinja_env.globals["word_icon"] = lambda word: Markup(word_icons.svg(word))
 app.secret_key = "dev-only-change-me"  # needed for session (login state later)
+initialize_database()
+auth_server.start()
 
 
 @app.route("/")
@@ -53,10 +57,26 @@ def nearby_players():
     nearby = scanner.nearby()
     return [p for p in players.PLAYERS if players.normalize(p["bt_address"]) in nearby]
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
     next_url = safe_next(request.args.get("next", ""))
     if session.get("username"):
+        return redirect(next_url or url_for("home"))
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        with sqlite3.connect(DATABASE) as connection:
+            user = connection.execute(
+                "SELECT id, username FROM users WHERE username = ? AND password = ?",
+                (username, password),
+            ).fetchone()
+        if user is None:
+            flash("Incorrect username or password.")
+            return redirect(url_for("login", next=next_url) if next_url else url_for("login"))
+        session["username"], session["user_id"] = user
+        mac_address = request.form.get("mac_address", "").strip()
+        if mac_address:
+            send_request({"action": "REGISTER_MAC", "mac_address": mac_address, "user_id": user[0]})
         return redirect(next_url or url_for("home"))
     scanner.start()
     return render_template(
@@ -65,6 +85,42 @@ def login():
         players=players.PLAYERS,
         show_simulator=SHOW_BT_SIMULATOR and app.debug,
     )
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "GET":
+        return render_template("register.html", form={}, errors={})
+    form = request.form
+    username, email, password = form.get("username", "").strip(), form.get("email", "").strip(), form.get("password", "")
+    errors = {}
+    if len(username) < 3:
+        errors["username"] = "Usernames need at least 3 characters."
+    if not email:
+        errors["email"] = "Please enter your email address."
+    if len(password) < 6:
+        errors["password"] = "Use at least 6 characters."
+    if password != form.get("confirm", ""):
+        errors["confirm"] = "Passwords don't match."
+    if not form.get("terms"):
+        errors["terms"] = "Please agree to the terms to join the fun."
+    if errors:
+        return render_template("register.html", form=form, errors=errors), 400
+    try:
+        with sqlite3.connect(DATABASE) as connection:
+            cursor = connection.execute(
+                "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+                (username, email, password),
+            )
+            user_id = cursor.lastrowid
+            connection.commit()
+    except sqlite3.IntegrityError:
+        flash("That username or email is already in use.")
+        return render_template("register.html", form=form, errors={}), 400
+    mac_address = form.get("mac_address", "").strip()
+    if mac_address:
+        send_request({"action": "REGISTER_MAC", "mac_address": mac_address, "user_id": user_id})
+    session["username"], session["user_id"] = username, user_id
+    return redirect(url_for("home"))
 
 @app.route("/login/bluetooth", methods=["POST"])
 def login_bluetooth():
@@ -84,9 +140,20 @@ def api_nearby():
     """Polled by the login and setup pages every few seconds."""
     scanner.start()
     near = {p["id"] for p in nearby_players()}
+    devices = scanner.nearby_devices()
+    authentication = send_request({
+        "action": "VERIFY_MAC",
+        "mac_addresses": [device["mac"] for device in devices],
+    }) if devices else {"status": "not_found"}
+    authenticated_user = authentication.get("user") if authentication.get("status") == "authenticated" else None
+    if authenticated_user:
+        session["username"] = authenticated_user["username"]
+        session["user_id"] = authenticated_user["id"]
     return jsonify({
         "status": scanner.status,
         "error": scanner.error,
+        "authenticated": authenticated_user,
+        "devices": devices,
         "players": [{"id": p["id"], "name": p["name"], "tone": p["tone"], "nearby": p["id"] in near}
                     for p in players.PLAYERS],
         "simulated": [p["id"] for p in players.PLAYERS
@@ -390,6 +457,13 @@ def quit_game():
 @app.route("/settings")
 def settings():     return _soon("Settings")
 
+@app.route("/terms")
+def terms():
+    return _soon("Terms of Service")
+
+@app.route("/privacy")
+def privacy():
+    return _soon("Privacy Policy")
 
 @app.route("/logout", methods=["POST"])
 def logout():

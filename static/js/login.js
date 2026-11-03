@@ -69,8 +69,26 @@
 
   function render(data) {
     if (signingIn) return;
+    if (data.authenticated) {
+      signingIn = true;
+      window.location.href = new URLSearchParams(window.location.search).get("next") || "/";
+      return;
+    }
     document.querySelectorAll("[data-sim]").forEach((b) =>
       b.setAttribute("aria-pressed", String((data.simulated || []).includes(b.dataset.sim))));
+    ["login-mac", "register-mac"].forEach((id) => {
+      const select = document.getElementById(id);
+      if (!select) return;
+      const selected = select.value;
+      select.innerHTML = '<option value="">Register later</option>';
+      (data.devices || []).forEach((device) => {
+        const option = document.createElement("option");
+        option.value = device.mac;
+        option.textContent = `${device.name} (${device.mac})`;
+        select.appendChild(option);
+      });
+      select.value = selected;
+    });
     const nearby = data.players.filter((p) => p.nearby);
 
     chips.forEach((chip) => {

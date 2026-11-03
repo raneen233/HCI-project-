@@ -19,6 +19,48 @@
 .auth h1 { margin: 0 0 6px; font-size: 30px; font-weight: 900; letter-spacing: -.01em; }
 .auth-sub { margin: 0 0 14px; font-size: 14px; color: var(--ink-soft); }
 
+/* ---------- authentication forms ---------- */
+.auth-form { display: flex; flex-direction: column; gap: 14px; text-align: left; }
+.auth-form .field { display: flex; flex-direction: column; gap: 6px; }
+.auth-form label { font-size: 13px; font-weight: 800; color: var(--ink); }
+.auth-form .input {
+  width: 100%; min-height: 46px; padding: 0 14px; border: 1.5px solid #dedbe7;
+  border-radius: 10px; background: var(--field-bg); color: var(--ink);
+  font: 600 14px var(--font);
+}
+.auth-form .input:focus { border-color: var(--purple); outline: 3px solid var(--purple-tint); }
+.input-wrap { position: relative; }
+.input-wrap .input { padding-right: 48px; }
+.eye-btn {
+  position: absolute; top: 50%; right: 8px; width: 34px; height: 34px;
+  display: grid; place-items: center; transform: translateY(-50%);
+  border: 0; border-radius: 8px; background: transparent; color: var(--ink-soft); cursor: pointer;
+}
+.eye-btn svg { width: 18px; height: 18px; }
+.eye-btn .eye-off { display: none; }
+.eye-btn[aria-pressed="true"] .eye-on { display: none; }
+.eye-btn[aria-pressed="true"] .eye-off { display: block; }
+.field-error {
+  display: none; align-items: center; gap: 5px; margin: 0;
+  color: #c4483b; font-size: 12px; font-weight: 700;
+}
+.field-error svg { width: 15px; height: 15px; flex: none; }
+.field.has-error .field-error { display: flex; }
+.field.has-error .input { border-color: #c4483b; }
+.field-check { margin-top: 2px; }
+.check { display: flex; align-items: flex-start; gap: 9px; cursor: pointer; }
+.check input { position: absolute; opacity: 0; }
+.check-box {
+  flex: none; width: 20px; height: 20px; border: 1.5px solid #c9c5d6;
+  border-radius: 6px; background: var(--field-bg);
+}
+.check input:checked + .check-box { border-color: var(--purple); background: var(--purple); }
+.check-text { font-size: 12px; line-height: 1.45; color: var(--ink-soft); }
+.auth-link { color: var(--purple-dark); font-weight: 800; }
+.auth-submit { width: 100%; margin-top: 4px; }
+.spinner { display: none; }
+.auth-foot p { margin: 6px 0; }
+
 .auth-close {
   position: absolute; top: 16px; right: 16px; z-index: 1;
   background: var(--field-bg); box-shadow: none; color: var(--ink-soft);
