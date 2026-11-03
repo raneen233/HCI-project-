@@ -3,5 +3,10 @@
     "difficulty": "professional",
     "rounds": 4,
     "player2": "Mostafa"
+  },
+  "Mostafa": {
+    "difficulty": "casual",
+    "rounds": 6,
+    "player2": "Omar"
   }
 }

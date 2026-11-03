@@ -377,18 +377,9 @@ def game_over():
 
 @app.route("/game/again", methods=["POST"])
 def play_again():
-    """Same players and settings, fresh scores and words."""
-    g = session.get("game")
-    if not g:
-        return redirect(url_for("setup"))
-    session["game"] = {
-        "id": uuid.uuid4().hex,
-        "player1": g["player1"], "player2": g["player2"],
-        "difficulty": g["difficulty"], "seconds": g["seconds"], "rounds": g["rounds"],
-        "round": 1,
-        "scores": {g["player1"]: 0, g["player2"]: 0},
-    }
-    return redirect(url_for("game"))
+    """End this game and go back to Game Setup (last choices are pre-selected there)."""
+    session.pop("game", None)
+    return redirect(url_for("setup"))
 
 @app.route("/game/quit", methods=["POST"])
 def quit_game():
