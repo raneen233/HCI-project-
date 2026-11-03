@@ -21,6 +21,7 @@ a { color: inherit; text-decoration: none; }
 .logo-img { width: 32px; height: 32px; image-rendering: pixelated; display: block; }
 .header-left { display: flex; align-items: center; gap: 18px; }
 .header-squiggle { position: absolute; left: clamp(20px, 6vw, 72px); top: 70px; }
+.header-actions { display: flex; align-items: center; gap: 10px; }
 
 /* ---------- buttons ---------- */
 .btn {

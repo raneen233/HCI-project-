@@ -21,6 +21,7 @@
   <a class="brand gesture-target" href="{{ url_for('home') }}">{{ i.logo() }}<span>Skribble</span></a>
   {% block header_left %}{% endblock %}
 </div>
+<div class="header-actions">{% block header_actions %}{% endblock %}</div>
     </div>
 {% block header_deco %}<div class="header-squiggle deco">{{ i.squiggle() }}</div>{% endblock %}
   </header>
