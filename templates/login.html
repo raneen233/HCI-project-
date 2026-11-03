@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Log In - Skribble{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">{% endblock %}
+
+{# The login screen is a floating card, so no site header here #}
+{% block header %}{% endblock %}
+
+{% block content %}
+<main class="auth">
+  <!-- background doodles -->
+  <span class="deco a1">{{ i.sparkle('#f6c85f') }}</span>
+  <span class="deco a2">{{ i.wave('#6db3e8') }}</span>
+  <span class="deco a3"></span>
+  <span class="deco a4">{{ i.sparkle('#6db3e8') }}</span>
+
+  <section class="auth-card" id="login-card" aria-labelledby="login-title">
+    <span class="deco auth-flower">{{ i.flower() }}</span>
+    <a class="icon-btn auth-close gesture-target" href="{{ url_for('home') }}" aria-label="Close and go back home">{{ i.close() }}</a>
+
+    <div class="auth-body">
+      <h1 id="login-title">Welcome Back!</h1>
+      <p class="auth-sub">Log in to continue your Skribble adventure.</p>
+
+      {% if error %}
+      <p class="form-error" role="alert">{{ i.alert() }}<span>{{ error }}</span></p>
+      {% endif %}
+
+      <form class="auth-form" id="login-form" method="post" action="{{ url_for('login') }}" novalidate>
+        <div class="field">
+          <label for="email">Email address</label>
+          <input class="input gesture-target" id="email" name="email" type="email"
+                 placeholder="you@example.com" autocomplete="email" value="{{ email or '' }}"
+                 aria-describedby="email-error">
+          <p class="field-error" id="email-error">{{ i.alert() }}<span></span></p>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <input class="input gesture-target" id="password" name="password" type="password"
+                   placeholder="Enter your password" autocomplete="current-password"
+                   aria-describedby="password-error">
+            <button class="eye-btn gesture-target" type="button" data-toggle-password="password"
+                    aria-label="Show password" aria-pressed="false">
+              <span class="eye-on">{{ i.eye() }}</span><span class="eye-off">{{ i.eye_off() }}</span>
+            </button>
+          </div>
+          <p class="field-error" id="password-error">{{ i.alert() }}<span></span></p>
+        </div>
+
+        <div class="forgot-row">
+          <a class="auth-link gesture-target" href="{{ url_for('forgot_password') }}">Forgot Password?</a>
+        </div>
+
+        <button class="btn btn-primary auth-submit gesture-target" type="submit">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="submit-label">Log In</span>
+        </button>
+      </form>
+    </div>
+
+    <footer class="auth-foot">
+      <p>New to Skribble? <a class="auth-link gesture-target" href="{{ url_for('register') }}">Create an account.</a></p>
+      <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+    </footer>
+  </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/validation.js') }}"></script>
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+{% endblock %}

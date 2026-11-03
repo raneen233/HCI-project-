@@ -1,7 +1,7 @@
 """Skribble - couch co-op drawing & guessing game (website stage).
 Run:  python app.py   ->  http://127.0.0.1:5000
 """
-from flask import Flask, render_template, session, redirect, url_for
+from flask import Flask, render_template, session, redirect, url_for, request
 
 app = Flask(__name__)
 app.secret_key = "dev-only-change-me"  # needed for session (login state later)
@@ -17,8 +17,31 @@ def home():
 def _soon(title):
     return render_template("coming_soon.html", title=title)
 
-@app.route("/login")
-def login():        return _soon("Log In")
+# TEMPORARY test account until Create Account saves real users
+# (swap check_login for the real check in core/users.py when it's ready).
+DEMO_USERS = {"doodle@example.com": {"username": "DoodleBuddy", "password": "doodle123"}}
+
+def check_login(email, password):
+    user = DEMO_USERS.get(email)
+    if user and user["password"] == password:
+        return user["username"]
+    return None
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+        username = check_login(email, password)
+        if username:
+            session["username"] = username
+            return redirect(url_for("home"))
+        return render_template("login.html", email=email,
+                               error="That email and password don't match. Try again.")
+    return render_template("login.html")
+
+@app.route("/forgot-password")
+def forgot_password():  return _soon("Forgot Password")
 
 @app.route("/register")
 def register():     return _soon("Create Account")
