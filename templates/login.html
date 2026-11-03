@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Log In - Skribble{% endblock %}
+{% import "partials/bt_icons.html" as bt %}
+{% block title %}Sign In - Skribble{% endblock %}
 {% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">{% endblock %}
 
-{# The login screen is a floating card, so no site header here #}
+{# The sign-in screen is a floating card, so no site header here #}
 {% block header %}{% endblock %}
 
 {% block content %}
 <main class="auth">
-  <!-- background doodles -->
   <span class="deco a1">{{ i.sparkle('#f6c85f') }}</span>
   <span class="deco a2">{{ i.wave('#6db3e8') }}</span>
   <span class="deco a3"></span>
@@ -18,56 +18,69 @@
     <a class="icon-btn auth-close gesture-target" href="{{ url_for('home') }}" aria-label="Close and go back home">{{ i.close() }}</a>
 
     <div class="auth-body">
+      <!-- scanning animation -->
+      <div class="bt-radar" id="bt-radar" aria-hidden="true">
+        <span class="ring"></span><span class="ring"></span><span class="ring"></span>
+        <span class="bt-phone">{{ bt.phone() }}<span class="bt-badge">{{ bt.bluetooth() }}</span></span>
+      </div>
+
       <h1 id="login-title">Welcome Back!</h1>
-      <p class="auth-sub">Log in to continue your Skribble adventure.</p>
+      <p class="auth-sub">Bring your phone close to sign in. No password needed.</p>
 
-      {% if error %}
-      <p class="form-error" role="alert">{{ i.alert() }}<span>{{ error }}</span></p>
-      {% endif %}
+      <p class="bt-status" id="bt-status" role="status" aria-live="polite">
+        <span class="bt-pulse"></span><span id="bt-status-text">Looking for nearby phones...</span>
+      </p>
 
-      <form class="auth-form" id="login-form" method="post" action="{{ url_for('login', next=next) if next else url_for('login') }}" novalidate>
-        <div class="field">
-          <label for="email">Email address</label>
-          <input class="input gesture-target" id="email" name="email" type="email"
-                 placeholder="you@example.com" autocomplete="email" value="{{ email or '' }}"
-                 aria-describedby="email-error">
-          <p class="field-error" id="email-error">{{ i.alert() }}<span></span></p>
-        </div>
+      <!-- shown when one phone is found: auto sign-in with a short countdown -->
+      <div class="bt-found" id="bt-found" hidden>
+        <span class="bt-avatar" id="bt-found-avatar"></span>
+        <span class="bt-found-text">
+          <strong id="bt-found-name"></strong>
+          <span>Signing you in...</span>
+          <span class="bt-progress"><i id="bt-progress"></i></span>
+        </span>
+        <button class="btn btn-outline btn-sm gesture-target" id="bt-cancel" type="button">Cancel</button>
+      </div>
 
-        <div class="field">
-          <label for="password">Password</label>
-          <div class="input-wrap">
-            <input class="input gesture-target" id="password" name="password" type="password"
-                   placeholder="Enter your password" autocomplete="current-password"
-                   aria-describedby="password-error">
-            <button class="eye-btn gesture-target" type="button" data-toggle-password="password"
-                    aria-label="Show password" aria-pressed="false">
-              <span class="eye-on">{{ i.eye() }}</span><span class="eye-off">{{ i.eye_off() }}</span>
-            </button>
-          </div>
-          <p class="field-error" id="password-error">{{ i.alert() }}<span></span></p>
-        </div>
-
-        <div class="forgot-row">
-          <a class="auth-link gesture-target" href="{{ url_for('forgot_password') }}">Forgot Password?</a>
-        </div>
-
-        <button class="btn btn-primary auth-submit gesture-target" type="submit">
-          <span class="spinner" aria-hidden="true"></span>
-          <span class="submit-label">Log In</span>
+      <p class="bt-players-title">Players</p>
+      <div class="bt-players" id="bt-players">
+        {% for p in players %}
+        <button class="bt-player gesture-target" type="button" data-id="{{ p.id }}" disabled
+                aria-label="Sign in as {{ p.name }} (phone not nearby)">
+          <span class="bt-avatar tone-{{ p.tone }}">{{ p.name[0] }}</span>
+          {{ p.name }}<i class="bt-dot" aria-hidden="true"></i>
         </button>
-      </form>
+        {% endfor %}
+      </div>
+      <p class="bt-hint" id="bt-hint">A green dot means that player's phone is nearby. Tap it to sign in.</p>
     </div>
 
     <footer class="auth-foot">
-      <p>New to Skribble? <a class="auth-link gesture-target" href="{{ url_for('register') }}">Create an account.</a></p>
-      <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <ol class="bt-steps">
+        <li>{{ bt.bluetooth() }}Turn on Bluetooth</li>
+        <li>{{ bt.unlock() }}Unlock your phone</li>
+        <li>{{ bt.near() }}Hold it near the laptop</li>
+      </ol>
+      <p class="bt-foot-tip">Phone not showing up? Open your phone's Bluetooth settings so the laptop can find it.</p>
+
+      {% if show_simulator %}
+      <div class="dev-panel">
+        <p><strong>Developer testing</strong> · Pretend a phone is nearby:</p>
+        <div class="dev-chips">
+          {% for p in players %}
+          <button class="dev-chip" type="button" data-sim="{{ p.id }}" aria-pressed="false">{{ p.name }}</button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
     </footer>
   </section>
 </main>
+
+<form id="bt-form" method="post" action="{{ url_for('login_bluetooth') }}" hidden>
+  <input type="hidden" name="player_id" id="bt-player-id">
+  <input type="hidden" name="next" value="{{ next or '' }}">
+</form>
 {% endblock %}
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/validation.js') }}"></script>
-<script src="{{ url_for('static', filename='js/login.js') }}"></script>
-{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/login.js') }}"></script>{% endblock %}

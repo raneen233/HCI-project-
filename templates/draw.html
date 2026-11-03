@@ -1,0 +1,141 @@
+{% extends "game_base.html" %}
+{% import "partials/draw_icons.html" as di %}
+{% block title %}Draw: {{ word }} - Skribble{% endblock %}
+{% block game_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/draw.css') }}">{% endblock %}
+{% block body_class %}in-game {{ 'mode-pro' if pro else 'mode-casual' }}{% endblock %}
+
+{# Hand-tracking camera card (side panel in Casual, inside the canvas in Professional) #}
+{% macro cam_card() %}
+<div class="cam-card">
+  <p class="cam-title">Hand tracking cam</p>
+  <div class="cam-view">
+    <img class="cam-feed" id="cam-feed" alt="" hidden>
+    <span class="cam-live"><i></i>Live</span>
+    <span class="cam-circle" aria-hidden="true"></span>
+    <i class="cam-corner tl"></i><i class="cam-corner tr"></i><i class="cam-corner bl"></i><i class="cam-corner br"></i>
+  </div>
+  <p class="cam-status" id="cam-status" hidden><i></i><span></span></p>
+</div>
+{% endmacro %}
+
+{% macro guide_card() %}
+<div class="guide-card">
+  <p class="guide-title">Gesture Guide</p>
+  <div class="guide-item"><span class="guide-emoji">🤌</span><span><strong>Draw</strong>Pinch your thumb and index finger to draw.</span></div>
+  <div class="guide-item"><span class="guide-emoji">✋</span><span><strong>Move</strong>Open your palm to move the cursor.</span></div>
+  <div class="guide-item"><span class="guide-emoji">✊</span><span><strong>Pause</strong>Make a closed fist to pause the game.</span></div>
+</div>
+{% endmacro %}
+
+{% block game_content %}
+<main class="container draw-page">
+  <div class="timer" id="timer" role="timer" aria-live="off">
+    <span class="timer-row">{{ di.stopwatch() }}<span id="timer-text">{{ '%02d:%02d' % (remaining // 60, remaining % 60) }}</span></span>
+    <small>Time left</small>
+  </div>
+
+  <div class="word-row">
+    <h1>Your word is: <strong>{{ word }}</strong></h1>
+    <span class="mode-chip">{{ si.sparkles() }}{{ difficulty_name }} · Drawing</span>
+  </div>
+
+  <div class="draw-layout">
+    <div class="canvas-wrap" id="canvas-wrap">
+      <canvas id="canvas" aria-label="Drawing canvas for the word {{ word }}"></canvas>
+      <p class="canvas-hint" id="canvas-hint">{{ i.hand() }}Pinch and move to draw · or click and drag with the mouse</p>
+      <div class="hand-cursor" id="hand-cursor" hidden><i></i><span class="pinch-pill">{{ si.check() }}Pinch detected</span></div>
+      {% if pro %}<div class="cam-overlay">{{ cam_card() }}{{ guide_card() }}</div>{% endif %}
+      <div class="times-up" id="times-up" hidden><strong>Time's up!</strong><span>Sending your drawing...</span></div>
+    </div>
+
+    {% if not pro %}
+    <aside class="side">
+      {{ cam_card() }}
+      {{ guide_card() }}
+    </aside>
+    {% endif %}
+
+    <div class="toolbar">
+      <div class="tool-group">
+        <span class="tool-label">Color</span>
+        <div class="swatches">
+          {% for name, hex in colors %}
+          <button class="swatch gesture-target" type="button" data-color="{{ hex }}" style="--c: {{ hex }}"
+                  aria-label="{{ name }}" aria-pressed="{{ 'true' if loop.index0 == default_color else 'false' }}">{{ si.check() }}</button>
+          {% endfor %}
+        </div>
+      </div>
+      <span class="divider"></span>
+      <div class="tool-group">
+        <span class="tool-label">Brush size</span>
+        <div class="sizes">
+          {% for name, px, dot in [('Small', 3, 4), ('Medium', 7, 7), ('Large', 14, 11)] %}
+          <button class="size-btn gesture-target" type="button" data-size="{{ px }}" aria-label="{{ name }} brush"
+                  aria-pressed="{{ 'true' if name == 'Medium' else 'false' }}"><i style="--d: {{ dot }}px"></i></button>
+          {% endfor %}
+        </div>
+      </div>
+      <span class="divider"></span>
+      <div class="edit-actions">
+        <button class="tool-btn gesture-target" id="undo-btn" type="button" disabled>{{ i.undo() }}Undo</button>
+        <button class="tool-btn danger gesture-target" id="clear-btn" type="button" disabled>{{ di.trash() }}Clear canvas</button>
+      </div>
+      {% if pro %}
+      <span class="divider"></span>
+      <div class="tools" role="group" aria-label="Drawing tool">
+        <button class="tool-chip gesture-target" type="button" data-tool="pencil" aria-pressed="true">Pencil</button>
+        <button class="tool-chip gesture-target" type="button" data-tool="brush" aria-pressed="false">Brush</button>
+        <button class="tool-chip gesture-target" type="button" data-tool="fineliner" aria-pressed="false">Fineliner</button>
+        <button class="tool-chip gesture-target" type="button" data-tool="eraser" aria-pressed="false">Eraser</button>
+      </div>
+      <button class="btn btn-primary finish-btn gesture-target" id="finish-btn" type="button">Finish drawing</button>
+      {% endif %}
+    </div>
+
+    {% if not pro %}
+    <div class="finish-cell">
+      <button class="btn btn-primary finish-btn gesture-target" id="finish-btn" type="button">Finish drawing</button>
+    </div>
+    {% endif %}
+  </div>
+</main>
+
+<form id="submit-form" method="post" action="{{ url_for('submit_drawing') }}" hidden>
+  <input type="hidden" name="drawing" id="drawing-data">
+  <input type="hidden" name="reason" id="submit-reason">
+</form>
+
+<!-- Clear canvas? -->
+<dialog class="modal draw-modal" id="clear-dialog" aria-labelledby="clear-title">
+  <div class="modal-body">
+    <span class="modal-icon is-danger">{{ di.trash() }}</span>
+    <p class="modal-eyebrow is-danger">Clear canvas?</p>
+    <h2 class="modal-title" id="clear-title">Delete the whole canvas?</h2>
+    <p class="modal-text">This will permanently remove everything on the canvas. You cannot undo this action.</p>
+    <div class="modal-actions">
+      <button class="btn btn-danger gesture-target" type="button" data-answer="yes">{{ si.check() }}Clear Canvas</button>
+      <button class="btn btn-quiet gesture-target" type="button" data-answer="no">{{ si.pencil() }}Keep Drawing</button>
+    </div>
+    <p class="modal-note">{{ si.lock() }}Timer paused while you decide</p>
+  </div>
+</dialog>
+
+<!-- Submit? -->
+<dialog class="modal draw-modal" id="finish-dialog" aria-labelledby="finish-title">
+  <div class="modal-body">
+    <span class="modal-icon">{{ di.send() }}</span>
+    <p class="modal-eyebrow">One last look</p>
+    <h2 class="modal-title" id="finish-title">Are you ready to submit your drawing?</h2>
+    <p class="modal-text" id="finish-text">Your masterpiece will be sent to {{ guesser }}. You won't be able to make changes after submitting.</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary gesture-target" type="button" data-answer="yes">{{ si.check() }}Finish Turn</button>
+      <button class="btn btn-quiet gesture-target" type="button" data-answer="no">{{ si.pencil() }}Continue Drawing</button>
+    </div>
+    <p class="modal-note">{{ si.lock() }}Timer paused while you decide</p>
+  </div>
+</dialog>
+
+<script type="application/json" id="draw-config">{{ {"remaining": remaining, "pro": pro, "guesser": guesser} | tojson }}</script>
+{% endblock %}
+
+{% block game_scripts %}<script src="{{ url_for('static', filename='js/draw.js') }}"></script>{% endblock %}

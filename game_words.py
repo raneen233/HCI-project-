@@ -40,3 +40,11 @@ def pick_words(difficulty, exclude=(), count=6):
 
 def all_words(difficulty):
     return [w for w, _ in WORDS[difficulty]]
+
+
+def answer_options(difficulty, word, count=4):
+    """The real word plus wrong answers from the same difficulty, shuffled."""
+    others = [w for w, _ in WORDS[difficulty] if w != word]
+    options = random.sample(others, count - 1) + [word]
+    random.shuffle(options)
+    return options

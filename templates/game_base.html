@@ -26,7 +26,7 @@
     <div class="game-header-right">
       <span class="score-box">
         <span class="score-label">{{ you }} · Your score</span>
-        <strong>{{ you_score }} pts</strong>
+        <strong><span id="you-score">{{ you_score }}</span> pts</strong>
       </span>
       <span class="avatar-md tone-blue">{{ si.smile() }}</span>
       <button class="icon-btn gesture-target" id="pause-btn" type="button" aria-label="Pause game">{{ si.pause() }}</button>

@@ -17,6 +17,7 @@
   {% if remembered %}
   <p class="setup-note">{{ si.sparkles() }}Welcome back, {{ player1 }}! We kept the setup from your last game.</p>
   {% endif %}
+  <p class="setup-note bt-note" id="bt-note" hidden></p>
 
   <form class="setup-grid" id="setup-form" method="post" action="{{ url_for('setup') }}">
     <div class="setup-main">
@@ -151,11 +152,12 @@
   <div class="modal-body">
     <p class="modal-eyebrow">Player 2</p>
     <h2 class="modal-title" id="picker-title">Who's playing with you?</h2>
-    <p class="modal-text">Pick your friend's account, or let them play as a guest.</p>
+    <p class="modal-text">Your friend's phone signs them in automatically when it's nearby. You can also pick them here.</p>
     <div class="picker-list">
-      {% for name in others %}
-      <button class="picker-item gesture-target" type="button" data-name="{{ name }}">
-        <span class="avatar-sm tone-blue">{{ si.smile() }}</span>{{ name }}
+      {% for p in others %}
+      <button class="picker-item gesture-target" type="button" data-name="{{ p.name }}" data-id="{{ p.id }}">
+        <span class="avatar-sm initial tone-{{ p.tone }}">{{ p.name[0] }}</span>{{ p.name }}
+        <span class="near-badge">Phone nearby</span>
       </button>
       {% endfor %}
       <button class="picker-item gesture-target" type="button" data-name="Guest">

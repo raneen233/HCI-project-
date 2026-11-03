@@ -145,3 +145,14 @@
   .players, .choices { grid-template-columns: 1fr; }
   .rounds { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* Bluetooth: nearby phones in the Player 2 picker */
+.avatar-sm.initial { font-weight: 900; font-size: 15px; }
+.tone-green  { background: #e3f3ec; color: #2f7d5c; }
+.tone-pink   { background: #fae0ea; color: #a8456f; }
+.tone-purple { background: #ece6fb; color: var(--purple-dark); }
+.tone-coral  { background: #fde8e4; color: #b4483c; }
+.picker-item .near-badge { display: none; margin-left: auto; padding: 3px 9px; border-radius: 99px; background: #e3f3ec; color: #3e9a73; font-size: 11px; font-weight: 800; }
+.picker-item.is-nearby .near-badge { display: inline-block; }
+.picker-item.is-nearby { border-color: #bfe3d2; }
+.bt-note { margin-top: 6px; color: #3e9a73; }

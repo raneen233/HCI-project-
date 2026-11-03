@@ -94,8 +94,28 @@
     update();
   });
 
-  // Hook for later: the Bluetooth code can call setup.setPlayer2("Jamie")
-  // when it recognises Player 2's phone.
+  // ---- Bluetooth: when another known phone is nearby, make them Player 2 ----
+  const btNote = document.getElementById("bt-note");
+  const autoAdded = new Set();     // only auto-add each player once per visit
+  async function pollNearby() {
+    try {
+      const res = await fetch("/api/bluetooth/nearby", { cache: "no-store" });
+      const data = await res.json();
+      const nearby = data.players.filter((p) => p.nearby && p.name !== player1);
+      picker.querySelectorAll(".picker-item[data-id]").forEach((b) =>
+        b.classList.toggle("is-nearby", nearby.some((p) => p.id === b.dataset.id)));
+      const fresh = nearby.find((p) => !autoAdded.has(p.id));
+      if (fresh && !p2Input.value && !summary.classList.contains("is-starting")) {
+        autoAdded.add(fresh.id);
+        setPlayer2(fresh.name);
+        btNote.textContent = `${fresh.name}'s phone is nearby, so they're Player 2. Tap their card to change.`;
+        btNote.hidden = false;
+      }
+    } catch { /* server busy: try again next time */ }
+  }
+  pollNearby();
+  setInterval(pollNearby, 3000);
+
   window.setup = { setPlayer2 };
   update();
 })();

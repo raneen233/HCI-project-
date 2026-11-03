@@ -1,0 +1,75 @@
+{% extends "game_base.html" %}
+{% import "partials/draw_icons.html" as di %}
+{% block title %}Your turn to guess - Skribble{% endblock %}
+{% block game_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/guess.css') }}">{% endblock %}
+
+{% block game_content %}
+<main class="container guess-page">
+  <p class="eyebrow" id="guess-eyebrow">Your turn to guess!</p>
+  <h1 class="guess-title">Your turn to guess!</h1>
+  <p class="guess-sub">Look at {{ drawer }}'s drawing and choose the correct answer.</p>
+
+  <div class="guess-layout">
+    <div class="drawing-card">
+      <img src="{{ url_for('drawing_image') }}?round={{ game.round }}" alt="{{ drawer }}'s drawing">
+    </div>
+
+    <aside class="answers-panel">
+      <h2>Choose Your Answer</h2>
+      <p class="answers-meta" id="answers-meta">
+        <span class="meta-lock">{{ si.lock() }}</span><span id="answers-meta-text">Four possibilities. One little guess.</span>
+      </p>
+
+      <div class="answers" id="answers">
+        {% for option in options %}
+        <button class="answer gesture-target" type="button" data-answer="{{ option }}">
+          <span class="answer-radio" aria-hidden="true">
+            <span class="icon-ok">{{ si.check() }}</span><span class="icon-no">{{ i.close() }}</span>
+          </span>
+          <span class="answer-text">{{ option }}</span>
+          <span class="answer-tag"></span>
+          <span class="answer-lock" aria-hidden="true">{{ si.lock() }}</span>
+          <span class="answer-ring" aria-hidden="true"></span>
+        </button>
+        {% endfor %}
+      </div>
+
+      <!-- prompt, then the result -->
+      <div class="guess-box" id="guess-box" aria-live="polite">
+        <div class="box-prompt">
+          <span class="box-icon">{{ i.hand() }}</span>
+          <strong>Got a guess, {{ guesser }}?</strong>
+          <p>Move to an answer, then pinch to select.<br>One guess per turn. Make it a good one!</p>
+        </div>
+        <div class="box-correct">
+          <i class="confetti c1"></i><i class="confetti c2"></i><i class="confetti c3"></i><i class="confetti c4"></i>
+          <strong>Correct! 🎉</strong>
+          <p>You guessed it!</p>
+          <span class="points">+<span id="points-won">20</span> points</span>
+        </div>
+        <div class="box-wrong">
+          <span class="box-icon">{{ i.close() }}</span>
+          <strong>Not quite!</strong>
+          <p>That wasn't the right answer. The word was <b id="real-word"></b>. Better luck next time!</p>
+        </div>
+      </div>
+
+      <form method="post" action="{{ url_for('next_round') }}">
+        <button class="btn btn-primary next-btn gesture-target" id="next-btn" type="submit" disabled>
+          <span>{{ 'See Results' if last_round else 'Next Round' }}</span>
+          <span class="next-play">{{ i.play() }}</span><span class="next-lock">{{ si.lock() }}</span>
+        </button>
+      </form>
+    </aside>
+  </div>
+</main>
+
+<script type="application/json" id="guess-config">{{ {
+  "guessed": guess,
+  "correct": guess_correct,
+  "word": word if guess else None,
+  "points": 20
+} | tojson }}</script>
+{% endblock %}
+
+{% block game_scripts %}<script src="{{ url_for('static', filename='js/guess.js') }}"></script>{% endblock %}

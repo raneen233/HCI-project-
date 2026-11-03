@@ -1,14 +1,16 @@
 """Skribble - couch co-op drawing & guessing game (website stage).
 Run:  python app.py   ->  http://127.0.0.1:5000
 """
+import base64
 import json
-import re
+import time
+import uuid
 from pathlib import Path
 
-from flask import Flask, render_template, session, redirect, url_for, request, flash
-from werkzeug.security import generate_password_hash, check_password_hash
-
-from game_words import pick_words
+from flask import Flask, render_template, session, redirect, url_for, request, flash, send_file, abort, jsonify
+from bluetooth_scanner import scanner
+from game_words import pick_words, answer_options
+import players
 
 app = Flask(__name__)
 app.secret_key = "dev-only-change-me"  # needed for session (login state later)
@@ -24,98 +26,68 @@ def home():
 def _soon(title):
     return render_template("coming_soon.html", title=title)
 
-# ---- Accounts: saved in data/accounts.json (passwords are hashed) ----------
-# Simple file storage for now. If core/users.py ends up handling users,
-# these helpers can be swapped for its functions.
-ACCOUNTS_FILE = Path(__file__).parent / "data" / "accounts.json"
+# ---- Bluetooth sign-in -----------------------------------------------------
+# Players are hardcoded in players.py. A player signs in when their phone is nearby.
+SHOW_BT_SIMULATOR = True   # "pretend a phone is nearby" panel on the login page (testing only)
 
-def load_accounts():
-    if ACCOUNTS_FILE.exists():
-        return json.loads(ACCOUNTS_FILE.read_text(encoding="utf-8"))
-    return {}
+def safe_next(url):
+    """Only allow redirects to our own pages (e.g. ?next=/setup)."""
+    return url if url.startswith("/") and not url.startswith("//") else ""
 
-def save_accounts(accounts):
-    ACCOUNTS_FILE.parent.mkdir(exist_ok=True)
-    ACCOUNTS_FILE.write_text(json.dumps(accounts, indent=2), encoding="utf-8")
+def nearby_players():
+    nearby = scanner.nearby()
+    return [p for p in players.PLAYERS if players.normalize(p["bt_address"]) in nearby]
 
-def check_login(email, password):
-    """Return the username if the email + password are right, else None."""
-    account = load_accounts().get(email)
-    if account and check_password_hash(account["password"], password):
-        return account["username"]
-    return None
-
-EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")
-USERNAME_RE = re.compile(r"^[A-Za-z0-9_]{3,20}$")
-
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/login")
 def login():
-    # ?next=/setup means "go back there after logging in" (only our own pages allowed)
-    next_url = request.args.get("next", "")
-    if not next_url.startswith("/") or next_url.startswith("//"):
-        next_url = ""
+    next_url = safe_next(request.args.get("next", ""))
+    if session.get("username"):
+        return redirect(next_url or url_for("home"))
+    scanner.start()
+    return render_template(
+        "login.html",
+        next=next_url,
+        players=players.PLAYERS,
+        show_simulator=SHOW_BT_SIMULATOR and app.debug,
+    )
 
-    if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
-        password = request.form.get("password", "")
-        username = check_login(email, password)
-        if username:
-            session["username"] = username
-            return redirect(next_url or url_for("home"))
-        return render_template("login.html", email=email, next=next_url,
-                               error="That email and password don't match. Try again.")
-    return render_template("login.html", next=next_url)
+@app.route("/login/bluetooth", methods=["POST"])
+def login_bluetooth():
+    next_url = safe_next(request.form.get("next", ""))
+    player = players.by_id(request.form.get("player_id", ""))
+    # Double-check on the server: the phone must really be nearby right now.
+    if not player or player not in nearby_players():
+        flash("We lost your phone's signal. Bring it closer and try again.")
+        return redirect(url_for("login", next=next_url) if next_url else url_for("login"))
+    session["username"] = player["name"]
+    session["player_id"] = player["id"]
+    flash(f"Welcome back, {player['name']}! Signed in with your phone.")
+    return redirect(next_url or url_for("home"))
 
-@app.route("/forgot-password")
-def forgot_password():  return _soon("Forgot Password")
+@app.route("/api/bluetooth/nearby")
+def api_nearby():
+    """Polled by the login and setup pages every few seconds."""
+    scanner.start()
+    near = {p["id"] for p in nearby_players()}
+    return jsonify({
+        "status": scanner.status,
+        "error": scanner.error,
+        "players": [{"id": p["id"], "name": p["name"], "tone": p["tone"], "nearby": p["id"] in near}
+                    for p in players.PLAYERS],
+        "simulated": [p["id"] for p in players.PLAYERS
+                      if players.normalize(p["bt_address"]) in scanner.simulated],
+    })
 
-@app.route("/terms")
-def terms():        return _soon("Terms of Service")
-
-@app.route("/privacy")
-def privacy():      return _soon("Privacy Policy")
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "GET":
-        return render_template("register.html")
-
-    form = {
-        "username": request.form.get("username", "").strip(),
-        "email": request.form.get("email", "").strip().lower(),
-        "terms": request.form.get("terms") == "yes",
-    }
-    password = request.form.get("password", "")
-    confirm = request.form.get("confirm", "")
-    accounts = load_accounts()
-
-    # Same checks as register.js, repeated here because the browser can't be trusted.
-    errors = {}
-    if not USERNAME_RE.match(form["username"]):
-        errors["username"] = "Use 3-20 letters, numbers or _."
-    elif any(a["username"].lower() == form["username"].lower() for a in accounts.values()):
-        errors["username"] = "That username is taken. Try another one."
-    if not EMAIL_RE.match(form["email"]):
-        errors["email"] = "Enter a valid email, like doodle@example.com."
-    elif form["email"] in accounts:
-        errors["email"] = "That email already has an account. Log in instead?"
-    if len(password) < 6:
-        errors["password"] = "Use at least 6 characters."
-    if confirm != password:
-        errors["confirm"] = "Passwords don't match."
-    if not form["terms"]:
-        errors["terms"] = "Please agree to the terms to join the fun."
-
-    if errors:
-        return render_template("register.html", form=form, errors=errors)
-
-    accounts[form["email"]] = {
-        "username": form["username"],
-        "password": generate_password_hash(password),
-    }
-    save_accounts(accounts)
-    session["username"] = form["username"]   # log them straight in
-    return redirect(url_for("home"))
+@app.route("/dev/bluetooth/simulate", methods=["POST"])
+def dev_simulate():
+    """Testing without phones: toggle 'this phone is nearby'. Only works in debug mode."""
+    if not (SHOW_BT_SIMULATOR and app.debug):
+        abort(404)
+    player = players.by_id((request.get_json(silent=True) or {}).get("player_id", ""))
+    if not player:
+        abort(400)
+    scanner.toggle_simulated(player["bt_address"])
+    return jsonify({"ok": True})
 
 @app.route("/how-to-play")
 def how_to_play():
@@ -128,11 +100,17 @@ DIFFICULTIES = {
 }
 ROUND_OPTIONS = [4, 6, 8, 10]
 
-def find_account(accounts, username):
-    for account in accounts.values():
-        if account["username"] == username:
-            return account
-    return None
+# Each player's last setup, so the page can remember it ("context").
+PREFS_FILE = Path(__file__).parent / "data" / "player_prefs.json"
+
+def load_prefs():
+    if PREFS_FILE.exists():
+        return json.loads(PREFS_FILE.read_text(encoding="utf-8"))
+    return {}
+
+def save_prefs(prefs):
+    PREFS_FILE.parent.mkdir(exist_ok=True)
+    PREFS_FILE.write_text(json.dumps(prefs, indent=2), encoding="utf-8")
 
 @app.route("/setup", methods=["GET", "POST"])
 def setup():
@@ -141,9 +119,9 @@ def setup():
         flash("Log in first to set up a game.")
         return redirect(url_for("login", next=url_for("setup")))
 
-    accounts = load_accounts()
-    account = find_account(accounts, player1)
-    others = sorted(a["username"] for a in accounts.values() if a["username"] != player1)
+    scanner.start()
+    others = [p["name"] for p in players.PLAYERS if p["name"] != player1]
+    prefs = load_prefs()
 
     if request.method == "POST":
         difficulty = request.form.get("difficulty")
@@ -155,6 +133,7 @@ def setup():
             return redirect(url_for("setup"))
 
         session["game"] = {
+            "id": uuid.uuid4().hex,
             "player1": player1,
             "player2": player2,
             "difficulty": difficulty,
@@ -164,19 +143,18 @@ def setup():
             "scores": {player1: 0, player2: 0},
         }
         # Context: remember this player's choices for next time.
-        if account:
-            account["last_setup"] = {"difficulty": difficulty, "rounds": rounds, "player2": player2}
-            save_accounts(accounts)
+        prefs[player1] = {"difficulty": difficulty, "rounds": rounds, "player2": player2}
+        save_prefs(prefs)
         return redirect(url_for("game"))
 
-    last = (account or {}).get("last_setup") or {}
+    last = prefs.get(player1) or {}
     player2 = last.get("player2")
     if player2 not in others + ["Guest"]:
         player2 = None
     return render_template(
         "setup.html",
         player1=player1,
-        others=others,
+        others=[p for p in players.PLAYERS if p["name"] != player1],
         player2=player2,
         difficulty=last.get("difficulty", "casual"),
         rounds=last.get("rounds", 6),
@@ -205,6 +183,8 @@ def game():
     g = session.get("game")
     if not g:
         return redirect(url_for("setup"))
+    if g.get("finished"):
+        return redirect(url_for("game_over"))
     # The server picks the 6 words once per round, so refreshing can't reroll them.
     if not g.get("choices"):
         g["choices"] = pick_words(g["difficulty"], exclude=g.get("used", []))
@@ -222,17 +202,177 @@ def choose_word():
     if word not in [c["word"] for c in g.get("choices") or []]:
         return redirect(url_for("game"))
     g["word"] = word
+    g["drawing_done"] = False
+    g.pop("draw_started", None)
     g.setdefault("used", []).append(word)
     g["choices"] = None              # next round gets fresh words
     session["game"] = g
     return redirect(url_for("draw"))
+
+# Casual gets 6 colours; Professional gets 4 extra ("more drawing options")
+CASUAL_COLORS = [("Ink", "#2a2840"), ("Coral", "#ef7f72"), ("Sky", "#6db3e8"),
+                 ("Leaf", "#6bb89a"), ("Sun", "#f6c85f"), ("Grape", "#8460d6")]
+PRO_EXTRA_COLORS = [("Slate", "#4a5878"), ("Lavender", "#b7a3e3"),
+                    ("Sand", "#e8dcc4"), ("Stone", "#cfcfd4")]
+DRAWINGS_DIR = Path(__file__).parent / "data" / "drawings"
+
+def drawing_path(g):
+    return DRAWINGS_DIR / f"{g['id']}_round{g['round']}.png"
 
 @app.route("/game/draw")
 def draw():
     g = session.get("game")
     if not g or not g.get("word"):
         return redirect(url_for("game"))
-    return _soon("Drawing")
+    if g.get("drawing_done"):
+        return redirect(url_for("guess"))
+
+    # The clock starts when the canvas first opens; refreshing doesn't reset it.
+    if not g.get("draw_started"):
+        g["draw_started"] = time.time()
+        session["game"] = g
+    remaining = max(5, int(g["seconds"] - (time.time() - g["draw_started"])))
+
+    pro = g["difficulty"] == "professional"
+    drawer, guesser = roles(g)
+    return render_template(
+        "draw.html",
+        word=g["word"], guesser=guesser, remaining=remaining, pro=pro,
+        colors=CASUAL_COLORS + (PRO_EXTRA_COLORS if pro else []),
+        default_color=0 if pro else 5,
+        **game_context(g, drawer),
+    )
+
+@app.route("/game/draw", methods=["POST"])
+def submit_drawing():
+    g = session.get("game")
+    if not g or not g.get("word"):
+        return redirect(url_for("setup"))
+    data = request.form.get("drawing", "")
+    prefix = "data:image/png;base64,"
+    if not data.startswith(prefix) or len(data) > 10_000_000:
+        flash("That drawing couldn't be sent. Try again.")
+        return redirect(url_for("draw"))
+
+    g.setdefault("id", uuid.uuid4().hex)
+    DRAWINGS_DIR.mkdir(parents=True, exist_ok=True)
+    drawing_path(g).write_bytes(base64.b64decode(data[len(prefix):]))
+
+    g["drawing_done"] = True
+    g.pop("draw_started", None)
+    session["game"] = g
+    drawer, guesser = roles(g)
+    if request.form.get("reason") == "timeout":
+        flash(f"Time's up! Your drawing was sent to {guesser}.")
+    else:
+        flash(f"Turn submitted! Pass the laptop to {guesser}.")
+    return redirect(url_for("guess"))
+
+@app.route("/game/drawing.png")
+def drawing_image():
+    """The current round's drawing (the Guessing page shows it)."""
+    g = session.get("game")
+    if not g or not g.get("drawing_done") or not drawing_path(g).exists():
+        abort(404)
+    return send_file(drawing_path(g), mimetype="image/png", max_age=0)
+
+# ---- Guessing ---------------------------------------------------------------
+GUESSER_POINTS = 20   # for guessing right
+DRAWER_POINTS = 10    # for drawing something your friend could guess
+
+@app.route("/game/guess")
+def guess():
+    g = session.get("game")
+    if not g or not g.get("drawing_done"):
+        return redirect(url_for("game"))
+    # 4 answers, picked once per round so refreshing doesn't change them
+    if not g.get("options"):
+        g["options"] = answer_options(g["difficulty"], g["word"])
+        session["game"] = g
+    drawer, guesser = roles(g)
+    return render_template(
+        "guess.html",
+        drawer=drawer, guesser=guesser,
+        options=g["options"],
+        guess=g.get("guess"), guess_correct=g.get("guess_correct"), word=g["word"],
+        last_round=g["round"] >= g["rounds"],
+        **game_context(g, guesser),
+    )
+
+@app.route("/game/guess", methods=["POST"])
+def submit_guess():
+    g = session.get("game")
+    if not g or not g.get("drawing_done") or not g.get("options"):
+        abort(400)
+    drawer, guesser = roles(g)
+
+    if not g.get("guess"):                       # only the first guess counts
+        answer = (request.get_json(silent=True) or {}).get("answer", "")
+        if answer not in g["options"]:
+            abort(400)
+        correct = answer == g["word"]
+        if correct:
+            g["scores"][guesser] = g["scores"].get(guesser, 0) + GUESSER_POINTS
+            g["scores"][drawer] = g["scores"].get(drawer, 0) + DRAWER_POINTS
+        g["guess"], g["guess_correct"] = answer, correct
+        session["game"] = g
+
+    return jsonify({
+        "guess": g["guess"],
+        "correct": g["guess_correct"],
+        "word": g["word"],
+        "points": GUESSER_POINTS if g["guess_correct"] else 0,
+        "score": g["scores"].get(guesser, 0),
+    })
+
+@app.route("/game/next", methods=["POST"])
+def next_round():
+    g = session.get("game")
+    if not g:
+        return redirect(url_for("setup"))
+    if not g.get("guess"):
+        return redirect(url_for("guess"))
+    for key in ("word", "choices", "options", "guess", "guess_correct", "draw_started"):
+        g.pop(key, None)
+    g["drawing_done"] = False
+    if g["round"] >= g["rounds"]:
+        g["finished"] = True
+        session["game"] = g
+        return redirect(url_for("game_over"))
+    g["round"] += 1
+    session["game"] = g
+    return redirect(url_for("game"))
+
+# ---- Game over --------------------------------------------------------------
+@app.route("/game/over")
+def game_over():
+    g = session.get("game")
+    if not g:
+        return redirect(url_for("setup"))
+    if not g.get("finished"):
+        return redirect(url_for("game"))
+    names = [g["player1"], g["player2"]]
+    results = [(n, g["scores"].get(n, 0)) for n in names]
+    top = max(score for _, score in results)
+    winners = [n for n, score in results if score == top]
+    tones = {n: (players.by_name(n) or {}).get("tone", "gray") for n in names}
+    return render_template("game_over.html", game=g, results=results,
+                           winner=winners[0], tie=len(winners) > 1, tones=tones)
+
+@app.route("/game/again", methods=["POST"])
+def play_again():
+    """Same players and settings, fresh scores and words."""
+    g = session.get("game")
+    if not g:
+        return redirect(url_for("setup"))
+    session["game"] = {
+        "id": uuid.uuid4().hex,
+        "player1": g["player1"], "player2": g["player2"],
+        "difficulty": g["difficulty"], "seconds": g["seconds"], "rounds": g["rounds"],
+        "round": 1,
+        "scores": {g["player1"]: 0, g["player2"]: 0},
+    }
+    return redirect(url_for("game"))
 
 @app.route("/game/quit", methods=["POST"])
 def quit_game():
@@ -247,17 +387,8 @@ def settings():     return _soon("Settings")
 @app.route("/logout", methods=["POST"])
 def logout():
     session.pop("username", None)
+    session.pop("player_id", None)
     flash("You've been logged out. See you soon!")
-    return redirect(url_for("home"))
-
-
-# ---- Dev helper: flip the Home page between guest / logged-in view ---------
-@app.route("/dev/toggle-login")
-def toggle_login():
-    if session.get("username"):
-        session.pop("username")
-    else:
-        session["username"] = "Doodler"
     return redirect(url_for("home"))
 
 

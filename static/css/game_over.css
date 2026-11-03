@@ -1,0 +1,40 @@
+/* ---------- Game Over ---------- */
+.over { flex: 1; display: grid; place-items: center; padding-top: 24px; padding-bottom: 48px; }
+.over-card {
+  width: min(600px, 100%); padding: 40px 36px 30px; text-align: center;
+  background: var(--surface); border: 1px solid #efebf6; border-radius: 28px; box-shadow: var(--shadow-soft);
+}
+.over-emoji { display: block; font-size: 60px; line-height: 1; margin-bottom: 12px; }
+.over-eyebrow { margin: 0 0 6px; font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--purple); }
+.over-card h1 { margin: 0; font-size: 40px; font-weight: 900; }
+.over-sub { margin: 6px 0 26px; font-size: 15px; color: var(--ink-soft); }
+
+.scores { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 26px; }
+.score-card {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 20px 12px 18px;
+  border: 2px solid #efebf6; border-radius: 20px; background: #fbfaf7;
+}
+.score-card.is-winner { border-color: var(--yellow); background: #fffaf0; }
+.crown { position: absolute; top: -16px; font-size: 26px; }
+.score-avatar { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; font-size: 22px; font-weight: 900; }
+.score-name { font-size: 18px; font-weight: 900; }
+.score-pts { font-size: 30px; font-weight: 900; color: var(--purple-dark); }
+.score-pts small { font-size: 14px; color: var(--ink-soft); }
+
+.tone-yellow { background: #f8e6b8; color: #6d5413; }
+.tone-blue   { background: #d9ebf8; color: #3f78ad; }
+.tone-green  { background: #e3f3ec; color: #2f7d5c; }
+.tone-pink   { background: #fae0ea; color: #a8456f; }
+.tone-purple { background: #ece6fb; color: var(--purple-dark); }
+.tone-coral  { background: #fde8e4; color: #b4483c; }
+.tone-gray   { background: #eceaf2; color: var(--ink-soft); }
+
+.over-actions { display: flex; justify-content: center; gap: 12px; }
+.over-actions form { margin: 0; }
+.over-actions .btn { min-width: 190px; }
+.over-note { margin: 14px 0 0; font-size: 12px; color: var(--ink-soft); }
+
+@media (max-width: 560px) {
+  .scores { grid-template-columns: 1fr; }
+  .over-actions { flex-direction: column; }
+}

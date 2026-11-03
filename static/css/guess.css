@@ -1,0 +1,100 @@
+/* ---------- Guessing page ---------- */
+.guess-page { flex: 1; padding-top: 22px; padding-bottom: 6px; }
+.eyebrow { margin: 0 0 6px; text-align: center; font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--purple); }
+.guess-title { margin: 0; text-align: center; font-size: clamp(28px, 3.2vw, 38px); font-weight: 900; }
+.guess-sub { margin: 6px 0 22px; text-align: center; font-size: 15px; color: var(--ink-soft); }
+
+.guess-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 28px; align-items: start; }
+
+.drawing-card {
+  aspect-ratio: 16 / 10.5; display: grid; place-items: center; overflow: hidden;
+  background: #fff; border: 1.5px solid #ebe7f1; border-radius: 24px; box-shadow: var(--shadow-soft);
+}
+.drawing-card img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+.answers-panel h2 { margin: 6px 0 4px; font-size: 24px; font-weight: 900; }
+.answers-meta { display: flex; align-items: center; gap: 6px; margin: 0 0 12px; font-size: 12px; color: var(--ink-soft); }
+.answers-meta svg { width: 13px; height: 13px; display: block; }
+.meta-lock { display: none; }
+.is-locked .meta-lock { display: block; }
+
+/* ---------- answers ---------- */
+.answers { display: flex; flex-direction: column; gap: 12px; }
+.answer {
+  position: relative; display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 0 16px;
+  background: #fff; border: 2px solid #efebf6; border-radius: 16px; box-shadow: var(--shadow-soft);
+  font: 800 18px var(--font); color: var(--ink); text-align: left; cursor: pointer;
+  transition: border-color .15s ease, background .15s ease, transform .12s ease;
+}
+.answer-radio { flex: none; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; border: 2px solid #ddd8e8; color: #fff; }
+.answer-radio svg { width: 13px; height: 13px; display: block; }
+.answer-radio .icon-ok, .answer-radio .icon-no { display: none; }
+.answer-text { flex: 1; }
+.answer-tag { font-size: 11px; font-weight: 800; }
+.answer-lock { display: none; color: var(--ink-soft); }
+.answer-lock svg { width: 14px; height: 14px; display: block; }
+/* hand-cursor style hover: highlight + ring on the right */
+.answer-ring { display: none; width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--purple); background: rgba(255,255,255,.7); position: relative; }
+.answer-ring::after { content: ""; position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--purple); }
+.answers:not(.is-locked) .answer:hover { background: #f1ecfd; border-color: var(--purple); color: var(--purple-dark); }
+.answers:not(.is-locked) .answer:hover .answer-radio { border-color: var(--purple); }
+.answers:not(.is-locked) .answer:hover .answer-ring { display: block; }
+.answer:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; }
+
+/* locked after the guess */
+.answers.is-locked .answer { cursor: default; box-shadow: none; }
+.answers.is-locked .answer:not(.is-chosen) { color: #6f6d82; }
+.answers.is-locked .answer:not(.is-chosen) .answer-lock { display: block; }
+.answer.is-correct { background: #eef8f3; border-color: #6bb89a; color: #2f7d5c; }
+.answer.is-correct .answer-radio { background: #3e9a73; border-color: #3e9a73; }
+.answer.is-correct .icon-ok { display: block; }
+.answer.is-correct .answer-tag { color: #3e9a73; }
+.answer.is-wrong { background: #fff1ef; border-color: #f0a197; color: #c4483b; }
+.answer.is-wrong .answer-radio { background: #d0675a; border-color: #d0675a; }
+.answer.is-wrong .icon-no { display: block; }
+.answer.is-wrong .answer-tag { color: #c4483b; }
+.answers.is-sending .answer { pointer-events: none; }
+
+/* ---------- prompt / result box ---------- */
+.guess-box {
+  position: relative; overflow: hidden; margin: 14px 0 12px; padding: 20px 18px; border-radius: 18px;
+  text-align: center; background: var(--purple-tint);
+}
+.guess-box strong { display: block; font-size: 20px; font-weight: 900; }
+.guess-box p { margin: 6px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--ink-soft); }
+.box-icon { display: inline-grid; place-items: center; margin-bottom: 6px; color: var(--purple); }
+.box-icon svg { width: 20px; height: 20px; }
+.box-correct, .box-wrong { display: none; }
+.guess-box.is-correct { background: #eef8f3; }
+.guess-box.is-correct .box-prompt { display: none; }
+.guess-box.is-correct .box-correct { display: block; animation: pop .35s cubic-bezier(.34,1.56,.64,1); }
+.guess-box.is-wrong { background: #fff1ef; }
+.guess-box.is-wrong .box-prompt { display: none; }
+.guess-box.is-wrong .box-wrong { display: block; animation: pop .35s cubic-bezier(.34,1.56,.64,1); }
+.box-wrong strong { color: #c4483b; }
+.box-wrong .box-icon { color: #d0675a; }
+.box-wrong b { color: var(--ink); }
+.points { display: block; margin-top: 8px; font-size: 20px; font-weight: 900; color: #2f7d5c; }
+@keyframes pop { from { transform: scale(.92); opacity: 0; } }
+
+.confetti { position: absolute; width: 8px; height: 8px; border-radius: 2px; animation: drift 2.6s ease-in-out infinite alternate; }
+.c1 { left: 8%;  top: 18%; background: var(--yellow); transform: rotate(20deg); }
+.c2 { right: 9%; top: 22%; background: var(--pink); border-radius: 50%; }
+.c3 { left: 14%; bottom: 22%; width: 5px; height: 5px; background: var(--blue); border-radius: 50%; }
+.c4 { right: 14%; bottom: 26%; width: 4px; height: 10px; background: var(--green); transform: rotate(30deg); }
+@keyframes drift { to { translate: 0 -6px; rotate: 25deg; } }
+
+/* ---------- next round ---------- */
+.next-btn { width: 100%; min-height: 54px; }
+.next-btn svg { width: 17px; height: 17px; display: block; }
+.next-lock { display: none; }
+.next-btn:disabled { background: #e6e2ef; border-color: #e6e2ef; color: #8d89a0; box-shadow: none; cursor: not-allowed; transform: none; }
+.next-btn:disabled .next-play { display: none; }
+.next-btn:disabled .next-lock { display: block; }
+
+@media (max-width: 960px) {
+  .guess-layout { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confetti, .box-correct, .box-wrong { animation: none !important; }
+}

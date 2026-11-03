@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Game Over - Skribble{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/game_over.css') }}">{% endblock %}
+{% block header_deco %}{% endblock %}
+
+{% block content %}
+<main class="container over">
+  <section class="over-card">
+    <span class="over-emoji" aria-hidden="true">{{ '🤝' if tie else '🏆' }}</span>
+    <p class="over-eyebrow">Game over · {{ game.rounds }} rounds played</p>
+    <h1>{{ "It's a tie!" if tie else winner ~ ' wins!' }}</h1>
+    <p class="over-sub">{{ 'Great minds draw alike.' if tie else 'What a game! Thanks for drawing and guessing together.' }}</p>
+
+    <div class="scores">
+      {% for name, score in results %}
+      <div class="score-card {{ 'is-winner' if (name == winner and not tie) }}">
+        {% if name == winner and not tie %}<span class="crown" aria-hidden="true">👑</span>{% endif %}
+        <span class="score-avatar tone-{{ tones[name] }}">{{ name[0] }}</span>
+        <span class="score-name">{{ name }}</span>
+        <span class="score-pts">{{ score }} <small>pts</small></span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="over-actions">
+      <form method="post" action="{{ url_for('play_again') }}">
+        <button class="btn btn-primary gesture-target" type="submit">{{ i.play() }}Play Again</button>
+      </form>
+      <a class="btn btn-outline gesture-target" href="{{ url_for('home') }}">Back to Home</a>
+    </div>
+    <p class="over-note">Play Again keeps the same players, difficulty and number of rounds.</p>
+  </section>
+</main>
+{% endblock %}
