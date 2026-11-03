@@ -1,50 +1,45 @@
 """Skribble word bank.
 
-Each word has an emoji (shown on its card, drawer only) and the card's tile colour.
-Add or remove words freely: each difficulty just needs at least 6.
+Every word here has a line icon in word_icons.py (shown on its card, drawer only).
+To add a word, add it to a list below AND draw its icon in word_icons.py.
+Each difficulty needs at least 6 words.
 """
 import random
 
+from word_icons import ICONS
+
 WORDS = {
     "casual": [
-        ("Apple", "🍎"), ("Sun", "☀️"), ("House", "🏠"), ("Cat", "🐱"), ("Fish", "🐟"),
-        ("Tree", "🌳"), ("Car", "🚗"), ("Ball", "⚽"), ("Cake", "🎂"), ("Star", "⭐"),
-        ("Flower", "🌸"), ("Moon", "🌙"), ("Boat", "⛵"), ("Dog", "🐶"), ("Hat", "🎩"),
-        ("Book", "📖"), ("Banana", "🍌"), ("Cloud", "☁️"), ("Heart", "❤️"), ("Pizza", "🍕"),
-        ("Ice Cream", "🍦"), ("Butterfly", "🦋"), ("Umbrella", "☂️"), ("Balloon", "🎈"),
+        "Apple", "Sun", "House", "Fish", "Tree", "Car", "Star", "Flower",
+        "Moon", "Boat", "Cloud", "Heart", "Ice Cream", "Balloon", "Umbrella", "Cat",
     ],
     "professional": [
-        ("Rainbow", "🌈"), ("Helicopter", "🚁"), ("Snowman", "⛄"), ("Telescope", "🔭"),
-        ("Volcano", "🌋"), ("Castle", "🏰"), ("Octopus", "🐙"), ("Skateboard", "🛹"),
-        ("Parachute", "🪂"), ("Cactus", "🌵"), ("Robot", "🤖"), ("Rocket", "🚀"),
-        ("Microscope", "🔬"), ("Piano", "🎹"), ("Compass", "🧭"), ("Tornado", "🌪️"),
-        ("Anchor", "⚓"), ("Ferris Wheel", "🎡"), ("Kangaroo", "🦘"), ("Dinosaur", "🦕"),
-        ("Guitar", "🎸"), ("Camera", "📷"), ("Bicycle", "🚲"), ("Tent", "⛺"),
-        ("Crown", "👑"), ("Trophy", "🏆"), ("Snail", "🐌"), ("Peacock", "🦚"),
+        "Lighthouse", "Telescope", "Helicopter", "Snowman", "Rainbow", "Submarine",
+        "Binoculars", "Piano", "Maze", "Rocket", "Cactus", "Anchor",
+        "Castle", "Volcano", "Camera", "Bicycle",
     ],
 }
 
 TONES = ["coral", "purple", "blue", "green", "pink", "gold"]
 
+# Catch typos early: every word must have an icon.
+_missing = [w for words in WORDS.values() for w in words if w not in ICONS]
+assert not _missing, f"These words have no icon in word_icons.py: {_missing}"
+
 
 def pick_words(difficulty, exclude=(), count=6):
     """Pick `count` random words for a round, skipping words already used this game."""
     bank = WORDS[difficulty]
-    pool = [w for w in bank if w[0] not in exclude]
+    pool = [w for w in bank if w not in exclude]
     if len(pool) < count:          # ran out of fresh words: allow repeats
         pool = bank
     chosen = random.sample(pool, count)
-    return [{"word": word, "emoji": emoji, "tone": TONES[i % len(TONES)]}
-            for i, (word, emoji) in enumerate(chosen)]
-
-
-def all_words(difficulty):
-    return [w for w, _ in WORDS[difficulty]]
+    return [{"word": word, "tone": TONES[i % len(TONES)]} for i, word in enumerate(chosen)]
 
 
 def answer_options(difficulty, word, count=4):
     """The real word plus wrong answers from the same difficulty, shuffled."""
-    others = [w for w, _ in WORDS[difficulty] if w != word]
+    others = [w for w in WORDS[difficulty] if w != word]
     options = random.sample(others, count - 1) + [word]
     random.shuffle(options)
     return options

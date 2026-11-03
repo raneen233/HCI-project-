@@ -40,7 +40,7 @@
           <input type="radio" name="word" value="{{ c.word }}">
           <span class="word-mark" aria-hidden="true">{{ si.check() }}</span>
           <span class="word-lock" aria-hidden="true">{{ si.lock() }}</span>
-          <span class="word-icon tone-{{ c.tone }}" aria-hidden="true">{{ c.emoji }}</span>
+          <span class="word-icon tone-{{ c.tone }}" aria-hidden="true">{{ word_icon(c.word) }}</span>
           <strong>{{ c.word }}</strong>
         </label>
         {% endfor %}

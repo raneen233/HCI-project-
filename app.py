@@ -10,9 +10,13 @@ from pathlib import Path
 from flask import Flask, render_template, session, redirect, url_for, request, flash, send_file, abort, jsonify
 from bluetooth_scanner import scanner
 from game_words import pick_words, answer_options
+from markupsafe import Markup
+import word_icons
 import players
 
 app = Flask(__name__)
+# {{ word_icon("Piano") }} in a template draws that word's line icon
+app.jinja_env.globals["word_icon"] = lambda word: Markup(word_icons.svg(word))
 app.secret_key = "dev-only-change-me"  # needed for session (login state later)
 
 
@@ -20,6 +24,17 @@ app.secret_key = "dev-only-change-me"  # needed for session (login state later)
 def home():
     # Logged-in users see "Welcome, <name>" instead of the Log In button.
     return render_template("home.html", username=session.get("username"))
+
+
+# ---- Professional theme --------------------------------------------------------
+# Every in-game page (word choosing -> drawing -> guessing -> results) uses the dark
+# "ink" look when the game is on Professional. Game Setup switches live in setup.js.
+GAME_PAGES = {"game", "draw", "guess", "game_over"}
+
+@app.context_processor
+def theme():
+    g = session.get("game") or {}
+    return {"pro_theme": request.endpoint in GAME_PAGES and g.get("difficulty") == "professional"}
 
 
 # ---- Placeholders: replaced page-by-page as designs arrive -----------------
@@ -157,6 +172,7 @@ def setup():
         others=[p for p in players.PLAYERS if p["name"] != player1],
         player2=player2,
         difficulty=last.get("difficulty", "casual"),
+        pro_theme=last.get("difficulty") == "professional",
         rounds=last.get("rounds", 6),
         round_options=ROUND_OPTIONS,
         remembered=bool(last),

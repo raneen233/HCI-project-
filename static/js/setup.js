@@ -64,6 +64,11 @@
 
   form.addEventListener("change", update);
 
+  // Professional = dark "ink" look for the whole game, starting right now
+  form.querySelectorAll('input[name="difficulty"]').forEach((r) =>
+    r.addEventListener("change", () =>
+      document.body.classList.toggle("theme-pro", r.checked && r.value === "professional")));
+
   // ---- Start ----
   form.addEventListener("submit", (e) => {
     e.preventDefault();

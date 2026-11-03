@@ -39,13 +39,15 @@
 .word-card input { position: absolute; opacity: 0; pointer-events: none; }
 .word-card:hover { border-color: #d8cff0; transform: translateY(-2px); }
 .word-card:has(input:focus-visible) { outline: 3px solid var(--purple); outline-offset: 3px; }
-.word-icon { width: 72px; height: 72px; display: grid; place-items: center; border-radius: 18px; font-size: 38px; line-height: 1; }
-.tone-coral  { background: #fde8e4; }
-.tone-purple { background: #ece6fb; }
-.tone-blue   { background: #ddeefa; }
-.tone-green  { background: #e3f3ec; }
-.tone-pink   { background: #fae0ea; }
-.tone-gold   { background: #fbf0d6; }
+.word-icon { width: 72px; height: 72px; display: grid; place-items: center; border-radius: 18px; transition: background .3s ease, color .3s ease; }
+.word-icon svg { width: 44px; height: 44px; display: block; }
+/* Casual: coloured line icon on a matching tinted tile */
+.tone-coral  { background: #fde8e4; color: #e0685a; }
+.tone-purple { background: #ece6fb; color: #7b59cf; }
+.tone-blue   { background: #ddeefa; color: #3f8ccc; }
+.tone-green  { background: #e3f3ec; color: #3e9a73; }
+.tone-pink   { background: #fae0ea; color: #c75a8a; }
+.tone-gold   { background: #fbf0d6; color: #c08a1e; }
 .word-card strong { font-size: 20px; font-weight: 900; }
 
 .word-mark, .word-lock {

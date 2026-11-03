@@ -10,9 +10,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme_pro.css') }}">
   {% block head %}{% endblock %}
 </head>
-<body class="{% block body_class %}{% endblock %}">
+<body class="{% block body_class %}{% endblock %}{{ ' theme-pro' if pro_theme }}">
 <div class="page">
   {# Short messages from Flask's flash(), e.g. "You've been logged out." #}
   {% with messages = get_flashed_messages() %}

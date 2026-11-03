@@ -1,0 +1,80 @@
+/* =====================================================================
+   Professional mode theme.
+   <body class="theme-pro"> swaps the purple look for a dark "ink" look.
+   Most of the site uses the colour variables from tokens.css, so changing
+   them here re-colours everything; the rules below fix the few places
+   that use fixed purple shades.
+   ===================================================================== */
+.theme-pro {
+  --purple: #2f2d4a;
+  --purple-dark: #1f1d36;
+  --purple-tint: #e8e7ef;
+  --bg: #f1f0ec;
+  --shadow-btn: 0 8px 18px rgba(31, 29, 54, .28);
+}
+body { transition: background-color .35s ease; }
+.btn, .choice-card, .round-option, .word-card, .answer, .summary, .chip { transition-property: background, background-color, border-color, color, transform, box-shadow; transition-duration: .3s; }
+
+/* little flower next to page titles */
+.theme-pro .title-flower svg g { stroke: #2f2d4a; fill: #e8e7ef; }
+
+/* ---------- Game Setup ---------- */
+.theme-pro .choice-card:hover,
+.theme-pro .round-option:hover,
+.theme-pro .p2-card:hover { border-color: #c9c7d6; }
+.theme-pro .p2-card.is-empty { border-color: #c9c7d6; background: #f8f8fa; }
+.theme-pro .summary.is-waiting .start-btn { background: #d3d2dc; border-color: #d3d2dc; }
+.theme-pro .summary.is-starting .start-btn { background: #e3e2ea; border-color: #e3e2ea; color: var(--purple); }
+.theme-pro .picker-item:hover { background: #f6f6f9; }
+
+/* ---------- in-game header ---------- */
+.theme-pro .round-dots i.done { background: #9a98ad; }
+
+/* ---------- Word Choosing: picked card turns solid ink ---------- */
+.theme-pro .word-card:hover { border-color: #c9c7d6; }
+.theme-pro .word-card:has(input:checked) { background: var(--purple); border-color: var(--purple); }
+.theme-pro .word-card:has(input:checked) strong { color: #fff; }
+.theme-pro .word-card:has(input:checked) .word-icon { background: rgba(255, 255, 255, .12); }
+.theme-pro .word-card:has(input:checked) .word-mark { background: #fff; border-color: #fff; color: var(--purple); }
+.theme-pro .is-locked .word-card:has(input:checked) .word-lock { background: #fff; color: var(--purple); }
+.theme-pro .is-locked #draw-btn { background: #e3e2ea; border-color: #e3e2ea; color: var(--purple); }
+
+/* ---------- Drawing ---------- */
+.theme-pro .cam-view { background: #e6e5ee; }
+.theme-pro .cam-circle { background: #f5f5f8; }
+.theme-pro .cam-corner { border-color: #8f8da3; }
+.theme-pro .cam-live { color: var(--purple); }
+
+/* ---------- Guessing ---------- */
+.theme-pro .answers:not(.is-locked) .answer:hover { background: #efeef4; border-color: var(--purple); color: var(--purple); }
+
+/* ---------- Game Over ---------- */
+.theme-pro .over-card { border-color: #e4e3ea; }
+.theme-pro .next-btn:disabled { background: #e3e2ea; border-color: #e3e2ea; color: #8a889c; }
+.theme-pro #draw-btn[aria-disabled="true"] { background: #e3e2ea; border-color: #e3e2ea; color: #9a98ad; }
+
+/* =====================================================================
+   Professional "vibe": monochrome line icons, muted accents
+   ===================================================================== */
+/* word cards: ink outline icons on a cool grey tile, white icon when picked */
+.theme-pro .word-icon { background: #eef0f4; color: var(--purple); }
+.theme-pro .word-card:has(input:checked) .word-icon { background: transparent; color: #fff; }
+.theme-pro .is-locked .word-card:not(:has(input:checked)) .word-icon { color: #9a98ad; }
+
+/* logo, sparkles and little doodles go monochrome */
+.theme-pro .logo-img { filter: grayscale(1) contrast(1.15); }
+.theme-pro .sparkle path { stroke: #a3a1b4; }
+.theme-pro .setup-note svg { color: #a3a1b4; }
+
+/* avatars and chips: neutral greys instead of yellow / blue */
+.theme-pro .avatar-lg, .theme-pro .avatar-md, .theme-pro .avatar-sm.tone-blue,
+.theme-pro .avatar-sm.tone-gray { background: #e8e7ef; color: var(--purple); }
+.theme-pro .chip-draw  { background: var(--purple); color: #fff; }
+.theme-pro .chip-guess { background: #e8e7ef; color: var(--purple); }
+
+/* difficulty tiles on Setup */
+.theme-pro .choice-icon.tone-green,
+.theme-pro .choice-icon.tone-gold { background: #eef0f4; color: var(--purple); }
+
+/* small info chips */
+.theme-pro .private-chip { background: #e8e7ef; color: var(--purple); }
