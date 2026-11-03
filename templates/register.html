@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Create Account - Skribble{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">{% endblock %}
+{% block header %}{% endblock %}
+
+{# errors = {"username": "...", "email": "...", ...} sent back by Flask, form = what the user typed #}
+{% set e = errors or {} %}
+{% set f = form or {} %}
+
+{% macro field_error(name) -%}
+  <p class="field-error" id="{{ name }}-error">{{ i.alert() }}<span>{{ e[name] or '' }}</span></p>
+{%- endmacro %}
+
+{% block content %}
+<main class="auth">
+  <span class="deco a1">{{ i.sparkle('#f6c85f') }}</span>
+  <span class="deco a2">{{ i.wave('#6db3e8') }}</span>
+  <span class="deco a3"></span>
+  <span class="deco a4">{{ i.sparkle('#6db3e8') }}</span>
+
+  <section class="auth-card" id="register-card" aria-labelledby="register-title">
+    <span class="deco auth-flower">{{ i.flower() }}</span>
+
+    <div class="auth-body">
+      <div class="auth-head">
+        <span class="brand auth-brand">{{ i.logo() }}<span>Skribble</span></span>
+        <h1 id="register-title">Join the Fun!</h1>
+        <p class="auth-sub">Create your account and start drawing, guessing, and laughing!</p>
+      </div>
+
+      <form class="auth-form" id="register-form" method="post" action="{{ url_for('register') }}" novalidate>
+        <div class="field {{ 'has-error' if e.username }}">
+          <label for="username">Username</label>
+          <input class="input gesture-target" id="username" name="username" type="text"
+                 placeholder="Choose a username" autocomplete="username" maxlength="20"
+                 value="{{ f.username or '' }}" aria-describedby="username-error">
+          {{ field_error('username') }}
+        </div>
+
+        <div class="field {{ 'has-error' if e.email }}">
+          <label for="email">Email Address</label>
+          <input class="input gesture-target" id="email" name="email" type="email"
+                 placeholder="Enter your email" autocomplete="email"
+                 value="{{ f.email or '' }}" aria-describedby="email-error">
+          {{ field_error('email') }}
+        </div>
+
+        <div class="field {{ 'has-error' if e.password }}">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <input class="input gesture-target" id="password" name="password" type="password"
+                   placeholder="Create a password" autocomplete="new-password"
+                   aria-describedby="password-error">
+            <button class="eye-btn gesture-target" type="button" data-toggle-password="password"
+                    aria-label="Show password" aria-pressed="false">
+              <span class="eye-on">{{ i.eye() }}</span><span class="eye-off">{{ i.eye_off() }}</span>
+            </button>
+          </div>
+          {{ field_error('password') }}
+        </div>
+
+        <div class="field {{ 'has-error' if e.confirm }}">
+          <label for="confirm">Confirm Password</label>
+          <div class="input-wrap">
+            <input class="input gesture-target" id="confirm" name="confirm" type="password"
+                   placeholder="Re-enter your password" autocomplete="new-password"
+                   aria-describedby="confirm-error">
+            <button class="eye-btn gesture-target" type="button" data-toggle-password="confirm"
+                    aria-label="Show password" aria-pressed="false">
+              <span class="eye-on">{{ i.eye() }}</span><span class="eye-off">{{ i.eye_off() }}</span>
+            </button>
+          </div>
+          {{ field_error('confirm') }}
+        </div>
+
+        <div class="field field-check {{ 'has-error' if e.terms }}">
+          <label class="check gesture-target">
+            <input type="checkbox" id="terms" name="terms" value="yes" {{ 'checked' if f.terms }}
+                   aria-describedby="terms-error">
+            <span class="check-box" aria-hidden="true"></span>
+            <span class="check-text">I agree to the
+              <a class="auth-link" href="{{ url_for('terms') }}" target="_blank">Terms of Service</a> and
+              <a class="auth-link" href="{{ url_for('privacy') }}" target="_blank">Privacy Policy</a>.</span>
+          </label>
+          {{ field_error('terms') }}
+        </div>
+
+        <button class="btn btn-primary auth-submit gesture-target" type="submit">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="submit-label">Create Account</span>
+        </button>
+      </form>
+    </div>
+
+    <footer class="auth-foot">
+      <p>Already have an account? <a class="auth-link gesture-target" href="{{ url_for('login') }}">Log in</a></p>
+      <p class="foot-back"><a class="auth-link gesture-target" href="{{ url_for('home') }}">Back to Home</a></p>
+      <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+    </footer>
+  </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/validation.js') }}"></script>
+<script src="{{ url_for('static', filename='js/register.js') }}"></script>
+{% endblock %}

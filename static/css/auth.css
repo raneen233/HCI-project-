@@ -111,3 +111,36 @@
 @media (prefers-reduced-motion: reduce) {
   .spinner { animation-duration: 2s; }
 }
+
+/* ================= Create Account additions ================= */
+.auth-head { text-align: center; }
+#register-card { width: min(470px, 100%); }
+.auth-brand { justify-content: center; margin-bottom: 14px; font-size: 24px; }
+.auth-head .auth-sub { margin-bottom: 26px; }
+
+/* checkbox: the whole row is the target, so it's easy to hit with a hand cursor */
+.field .check {
+  display: flex; align-items: center; gap: 12px; min-height: 44px;
+  margin: 0; font-size: 13.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer;
+}
+.check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.check-box {
+  flex: none; width: 22px; height: 22px; border-radius: 6px;
+  border: 2px solid #cfc7e6; background: var(--surface);
+  display: grid; place-items: center; transition: background .12s ease, border-color .12s ease;
+}
+.check-box::after {
+  content: ""; width: 6px; height: 11px; margin-top: -2px;
+  border: solid #fff; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg) scale(0);
+  transition: transform .12s ease;
+}
+.check:hover .check-box { border-color: var(--purple); }
+.check input:checked + .check-box { background: var(--purple); border-color: var(--purple); }
+.check input:checked + .check-box::after { transform: rotate(45deg) scale(1); }
+.check input:focus-visible + .check-box { outline: 3px solid var(--purple); outline-offset: 2px; }
+.field-check { margin: 4px 0 20px; }
+.field-check .field-error { margin-top: 2px; }
+.field-check.has-error .check-box { border-color: var(--error); }
+
+.foot-back { margin-top: 8px !important; }
+.auth-card.is-loading .check { pointer-events: none; opacity: .6; }

@@ -25,7 +25,7 @@
       <p class="form-error" role="alert">{{ i.alert() }}<span>{{ error }}</span></p>
       {% endif %}
 
-      <form class="auth-form" id="login-form" method="post" action="{{ url_for('login') }}" novalidate>
+      <form class="auth-form" id="login-form" method="post" action="{{ url_for('login', next=next) if next else url_for('login') }}" novalidate>
         <div class="field">
           <label for="email">Email address</label>
           <input class="input gesture-target" id="email" name="email" type="email"

@@ -1,0 +1,70 @@
+{#
+  Shared layout for in-game screens (Word Choosing, Drawing, Guessing).
+  Flask passes: game, you, you_score, difficulty_name
+#}
+{% extends "base.html" %}
+{% import "partials/setup_icons.html" as si %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+{% block game_head %}{% endblock %}
+{% endblock %}
+{% block body_class %}in-game{% endblock %}
+
+{% block header %}
+<header class="game-header">
+  <div class="game-header-inner">
+    <span class="brand">{{ i.logo() }}<span>Skribble</span></span>
+
+    <div class="round-progress">
+      <span class="round-label">Round {{ game.round }} of {{ game.rounds }}</span>
+      <span class="round-dots" aria-hidden="true">
+        {% for n in range(1, game.rounds + 1) %}<i class="{{ 'done' if n < game.round else ('on' if n == game.round) }}"></i>{% endfor %}
+      </span>
+    </div>
+
+    <div class="game-header-right">
+      <span class="score-box">
+        <span class="score-label">{{ you }} · Your score</span>
+        <strong>{{ you_score }} pts</strong>
+      </span>
+      <span class="avatar-md tone-blue">{{ si.smile() }}</span>
+      <button class="icon-btn gesture-target" id="pause-btn" type="button" aria-label="Pause game">{{ si.pause() }}</button>
+    </div>
+  </div>
+</header>
+{% endblock %}
+
+{% block content %}
+{% block game_content %}{% endblock %}
+
+<footer class="game-footer">
+  <span class="hand-status" id="hand-status"><i></i><span>Mouse mode</span></span>
+  <span class="game-meta">{{ difficulty_name }} · {{ game.seconds }}s drawing · {{ game.rounds }} rounds</span>
+</footer>
+
+<!-- Pause menu (pause button now, closed-fist gesture later) -->
+<dialog class="modal" id="pause-dialog" aria-labelledby="pause-title">
+  <div class="modal-body">
+    <p class="modal-eyebrow">Taking a break</p>
+    <h2 class="modal-title" id="pause-title">Game Paused</h2>
+    <p class="modal-text">Everything is on hold. Press Resume when you're both ready.</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary gesture-target" id="resume-btn" type="button">{{ i.play() }}Resume</button>
+      <form method="post" action="{{ url_for('quit_game') }}"
+            data-confirm="Quit this game?"
+            data-confirm-eyebrow="Leaving already?"
+            data-confirm-text="The game will end and these scores won't be saved."
+            data-confirm-ok="Quit Game"
+            data-confirm-cancel="Keep Playing">
+        <button class="btn btn-outline gesture-target quit-btn" type="submit">Quit Game</button>
+      </form>
+    </div>
+  </div>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>
+{% block game_scripts %}{% endblock %}
+{% endblock %}

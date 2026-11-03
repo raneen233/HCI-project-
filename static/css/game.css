@@ -1,0 +1,49 @@
+/* ---------- shared layout for in-game screens ---------- */
+[hidden] { display: none !important; }
+
+.game-header { border-bottom: 1px solid #ebe8e0; }
+.game-header-inner {
+  max-width: 1240px; margin: 0 auto; padding: 14px clamp(20px, 6vw, 72px);
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+}
+.round-progress { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.round-label { font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.round-dots { display: flex; gap: 5px; }
+.round-dots i { width: 6px; height: 6px; border-radius: 99px; background: #dcd7ea; }
+.round-dots i.done { background: #b9a6ea; }
+.round-dots i.on { width: 20px; background: var(--purple); }
+
+.game-header-right { justify-self: end; display: flex; align-items: center; gap: 12px; }
+.score-box { display: flex; flex-direction: column; text-align: right; line-height: 1.2; }
+.score-label { font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft); }
+.score-box strong { font-size: 19px; font-weight: 900; }
+.avatar-md { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; }
+.avatar-md svg { width: 24px; height: 24px; }
+.tone-blue { background: #d9ebf8; color: #3f78ad; }
+
+.game-footer {
+  width: 100%; max-width: 1240px; margin: 0 auto; padding: 10px clamp(20px, 6vw, 72px) 18px;
+  display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--ink-soft);
+}
+/* set by game.js: handStatus.set("hand" | "lost" | "mouse") */
+.hand-status {
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 99px;
+  background: #eceaf2; color: var(--ink-soft); font-size: 10.5px; font-weight: 900; letter-spacing: .05em; text-transform: uppercase;
+}
+.hand-status i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.hand-status.is-hand { background: #e3f3ec; color: #3e9a73; }
+.hand-status.is-lost { background: #fde6e3; color: #c4483b; }
+
+.quit-btn { width: 100%; }
+.modal-actions form { margin: 0; }
+
+.spinner {
+  display: none; width: 18px; height: 18px; border-radius: 50%;
+  border: 2.5px solid currentColor; border-right-color: transparent; animation: game-spin .8s linear infinite;
+}
+@keyframes game-spin { to { transform: rotate(360deg); } }
+@keyframes nudge { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+@media (max-width: 760px) {
+  .score-box { display: none; }
+}

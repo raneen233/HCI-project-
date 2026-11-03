@@ -4,7 +4,19 @@
 
 {% block header_actions %}
   {% if username %}
-    <span class="welcome-pill"><span class="avatar"></span>Welcome, {{ username }}</span>
+    <details class="user-menu">
+      <summary class="welcome-pill gesture-target"><span class="avatar"></span>Welcome, {{ username }}<span class="caret" aria-hidden="true"></span></summary>
+      <div class="user-menu-panel">
+        <form method="post" action="{{ url_for('logout') }}"
+              data-confirm="Log out?"
+              data-confirm-eyebrow="Leaving so soon?"
+              data-confirm-text="You'll need to log in again to play with your name and scores."
+              data-confirm-ok="Log Out"
+              data-confirm-cancel="Stay Logged In">
+          <button class="user-menu-item gesture-target" type="submit">Log out</button>
+        </form>
+      </div>
+    </details>
   {% else %}
     <a class="btn btn-outline btn-sm gesture-target" href="{{ url_for('login') }}">{{ i.user() }}Log In</a>
   {% endif %}

@@ -1,0 +1,68 @@
+{% extends "game_base.html" %}
+{% block title %}Choose Your Word - Skribble{% endblock %}
+{% block game_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/word.css') }}">{% endblock %}
+
+{% block game_content %}
+<main class="container word-page">
+
+  <!-- Step 1: hand the laptop to the drawer, the guesser looks away -->
+  <section class="handoff" id="handoff">
+    <div class="handoff-card">
+      <span class="handoff-emoji" aria-hidden="true">🙈</span>
+      <p class="eyebrow">Round {{ game.round }} · Secret word time</p>
+      <h1>{{ drawer }}'s turn to draw!</h1>
+      <p class="handoff-text">{{ guesser }}, look away from the screen while {{ drawer }} picks a word.</p>
+      <button class="btn btn-primary gesture-target" id="reveal-btn" type="button">{{ i.hand() }}I'm {{ drawer }}, show my words</button>
+    </div>
+  </section>
+
+  <!-- Step 2: choose the secret word -->
+  <section class="word-step" id="word-step" hidden>
+    <p class="eyebrow">You are drawing!</p>
+    <h1 class="word-title">Choose Your Secret Word! {{ i.sparkle('#f6c85f') }}</h1>
+    <p class="word-sub">Pick one word to draw. Your friend will try to guess it!</p>
+
+    <div class="info-row">
+      <span class="info-chip">{{ si.lock() }}Difficulty: {{ difficulty_name }}</span>
+      <span class="info-plain">{{ i.clock() }}{{ game.seconds }} seconds to draw · starts on canvas</span>
+      <span class="private-chip">{{ si.lock() }}Private · Drawer only</span>
+    </div>
+
+    <div class="block-head">
+      <h2>Choose One Word to Draw</h2>
+      <span class="block-meta">Only you can see these words.</span>
+    </div>
+
+    <form id="word-form" method="post" action="{{ url_for('choose_word') }}">
+      <div class="word-grid">
+        {% for c in choices %}
+        <label class="word-card gesture-target">
+          <input type="radio" name="word" value="{{ c.word }}">
+          <span class="word-mark" aria-hidden="true">{{ si.check() }}</span>
+          <span class="word-lock" aria-hidden="true">{{ si.lock() }}</span>
+          <span class="word-icon tone-{{ c.tone }}" aria-hidden="true">{{ c.emoji }}</span>
+          <strong>{{ c.word }}</strong>
+        </label>
+        {% endfor %}
+      </div>
+
+      <p class="word-status" id="word-status" aria-live="polite">
+        <span class="status-icon">{{ i.hand() }}</span><span class="status-lock">{{ si.lock() }}</span>
+        <span id="word-status-text">No word selected yet · Move to a card and pinch to choose</span>
+      </p>
+
+      <div class="word-actions">
+        <button class="btn btn-outline gesture-target" id="word-back" type="button">{{ i.arrow_left() }}Back</button>
+        <button class="btn btn-primary gesture-target" id="draw-btn" type="submit" aria-disabled="true">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="draw-icon">{{ i.play() }}</span>
+          <span class="draw-label">Let's Draw!</span>
+        </button>
+      </div>
+      <p class="word-foot" id="word-foot">Your drawing time begins only after you confirm with Let's Draw!</p>
+    </form>
+  </section>
+</main>
+{% endblock %}
+
+{% block game_scripts %}<script src="{{ url_for('static', filename='js/word.js') }}"></script>{% endblock %}

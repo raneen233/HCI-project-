@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% import "partials/setup_icons.html" as si %}
+{% block title %}Set Up Your Game - Skribble{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/setup.css') }}">{% endblock %}
+
+{% block header_left %}
+  <a class="btn btn-outline btn-sm gesture-target" href="{{ url_for('home') }}">{{ i.arrow_left() }}Back</a>
+{% endblock %}
+{% block header_actions %}
+  <a class="icon-btn gesture-target" href="{{ url_for('settings') }}" aria-label="Settings">{{ i.gear() }}</a>
+{% endblock %}
+{% block header_deco %}{% endblock %}
+
+{% block content %}
+<main class="container setup">
+  <h1 class="setup-title">Set Up Your Game <span class="title-flower">{{ i.mini_flower() }}</span></h1>
+  {% if remembered %}
+  <p class="setup-note">{{ si.sparkles() }}Welcome back, {{ player1 }}! We kept the setup from your last game.</p>
+  {% endif %}
+
+  <form class="setup-grid" id="setup-form" method="post" action="{{ url_for('setup') }}">
+    <div class="setup-main">
+
+      <!-- Who's playing -->
+      <section class="block" aria-labelledby="players-h">
+        <div class="block-head">
+          <h2 id="players-h">Who's Playing?</h2>
+          <span class="block-meta" id="players-meta">{{ '2 players signed in' if player2 else '1 of 2 players signed in' }}</span>
+        </div>
+        <div class="players">
+          <div class="player-card">
+            <span class="avatar-lg tone-yellow">{{ si.smile() }}</span>
+            <span class="player-info">
+              <span class="player-label">Player 1 · You</span>
+              <strong class="player-name">{{ player1 }}</strong>
+            </span>
+            <span class="chip chip-draw">{{ si.pencil() }}Round 1 · Draws</span>
+          </div>
+
+          <button class="player-card p2-card gesture-target {{ '' if player2 else 'is-empty' }}" id="p2-card"
+                  type="button" aria-haspopup="dialog">
+            <span class="avatar-lg tone-blue">
+              <span class="when-filled">{{ si.smile() }}</span><span class="when-empty">{{ si.plus() }}</span>
+            </span>
+            <span class="player-info">
+              <span class="player-label">Player 2</span>
+              <strong class="player-name" id="p2-name">{{ player2 or 'Add Player 2' }}</strong>
+            </span>
+            <span class="chip chip-guess when-filled">{{ i.chat() }}Round 1 · Guesses</span>
+            <span class="chip chip-required when-empty">Required</span>
+          </button>
+        </div>
+        <input type="hidden" name="player2" id="player2" value="{{ player2 or '' }}">
+      </section>
+
+      <!-- Difficulty -->
+      <section class="block" aria-labelledby="diff-h">
+        <div class="block-head">
+          <h2 id="diff-h">Choose Your Difficulty</h2>
+          <span class="block-meta">Pick one</span>
+        </div>
+        <div class="choices">
+          <label class="choice-card gesture-target">
+            <input type="radio" name="difficulty" value="casual" data-name="Casual" data-seconds="60"
+                   {{ 'checked' if difficulty == 'casual' }}>
+            <span class="choice-top">
+              <span class="choice-icon tone-green">{{ si.apple() }}</span>
+              <span class="choice-mark" aria-hidden="true">{{ si.check() }}</span>
+            </span>
+            <strong class="choice-name">Casual</strong>
+            <span class="choice-desc">Simple words and familiar objects.</span>
+            <span class="choice-time">{{ i.clock() }}60 seconds per round</span>
+          </label>
+
+          <label class="choice-card gesture-target">
+            <input type="radio" name="difficulty" value="professional" data-name="Professional" data-seconds="45"
+                   {{ 'checked' if difficulty == 'professional' }}>
+            <span class="choice-top">
+              <span class="choice-icon tone-gold">{{ si.puzzle() }}</span>
+              <span class="choice-mark" aria-hidden="true">{{ si.check() }}</span>
+            </span>
+            <strong class="choice-name">Professional</strong>
+            <span class="choice-desc">More detailed words and more drawing options.</span>
+            <span class="choice-time">{{ i.clock() }}45 seconds per round</span>
+          </label>
+        </div>
+        <p class="lock-note">{{ si.lock() }}Your drawing time is automatically set by the difficulty level.</p>
+      </section>
+
+      <!-- Rounds -->
+      <section class="block" aria-labelledby="rounds-h">
+        <div class="block-head"><h2 id="rounds-h">How Many Rounds?</h2></div>
+        <div class="rounds">
+          {% for n in round_options %}
+          <label class="round-option gesture-target">
+            <input type="radio" name="rounds" value="{{ n }}" {{ 'checked' if n == rounds }}>
+            <span>{{ n }} rounds</span><span class="round-check" aria-hidden="true">{{ si.check() }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+
+    <!-- Live summary -->
+    <aside class="summary" id="summary">
+      <p class="summary-eyebrow"><i></i><span id="sum-status">Ready when you are</span></p>
+      <h2>Your Game Setup</h2>
+      <p class="summary-sub">A quick peek before the first scribble.</p>
+
+      <div class="summary-rows">
+        <div class="sum-row">
+          <span class="row-icon">{{ si.users() }}</span>
+          <span class="row-text"><span class="row-label">Players</span><span class="row-note" id="sum-players"></span></span>
+          <span class="row-value">Player 1 vs Player 2</span>
+        </div>
+        <div class="sum-row">
+          <span class="row-icon">{{ si.sparkles() }}</span>
+          <span class="row-text"><span class="row-label">Difficulty</span></span>
+          <span class="row-value" id="sum-difficulty"></span>
+        </div>
+        <div class="sum-row">
+          <span class="row-icon">{{ i.clock() }}</span>
+          <span class="row-text"><span class="row-label">Drawing time</span><span class="row-note">Automatically set by difficulty</span></span>
+          <span class="row-value" id="sum-time"></span>
+        </div>
+        <div class="sum-row">
+          <span class="row-icon">{{ si.repeat() }}</span>
+          <span class="row-text"><span class="row-label">Rounds</span></span>
+          <span class="row-value" id="sum-rounds"></span>
+        </div>
+      </div>
+
+      <div class="first-up" aria-live="polite">
+        <strong id="sum-first-title">First up: Round 1</strong>
+        <span id="sum-first-roles"></span>
+        <span id="sum-first-time"></span>
+      </div>
+
+      <button class="btn btn-primary start-btn gesture-target" id="start-btn" type="submit">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="start-icon">{{ i.play() }}</span>
+        <span class="start-label">Start Game</span>
+      </button>
+      <p class="summary-foot" id="sum-foot"></p>
+    </aside>
+  </form>
+</main>
+
+<!-- Player 2 picker -->
+<dialog class="modal picker" id="p2-picker" aria-labelledby="picker-title" data-player1="{{ player1 }}">
+  <div class="modal-body">
+    <p class="modal-eyebrow">Player 2</p>
+    <h2 class="modal-title" id="picker-title">Who's playing with you?</h2>
+    <p class="modal-text">Pick your friend's account, or let them play as a guest.</p>
+    <div class="picker-list">
+      {% for name in others %}
+      <button class="picker-item gesture-target" type="button" data-name="{{ name }}">
+        <span class="avatar-sm tone-blue">{{ si.smile() }}</span>{{ name }}
+      </button>
+      {% endfor %}
+      <button class="picker-item gesture-target" type="button" data-name="Guest">
+        <span class="avatar-sm tone-gray">{{ si.plus() }}</span>Play as Guest
+      </button>
+    </div>
+    <button class="btn btn-outline picker-cancel gesture-target" type="button">Cancel</button>
+  </div>
+</dialog>
+{% endblock %}
+
+{% block scripts %}<script src="{{ url_for('static', filename='js/setup.js') }}"></script>{% endblock %}
